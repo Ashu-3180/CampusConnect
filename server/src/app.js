@@ -27,6 +27,7 @@ app.get("/", (req, res) => {
 });
 
 // API Routes
+app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
