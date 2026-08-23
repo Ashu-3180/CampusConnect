@@ -1,4 +1,5 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const navigation = [
   { name: "Home", path: "/app" },
@@ -13,6 +14,16 @@ const bottomNavigation = [
 ];
 
 function Sidebar() {
+  // Add these
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  // Add this function
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   const linkClasses = ({ isActive }) =>
     `block rounded-lg px-4 py-3 transition ${
       isActive
@@ -55,7 +66,11 @@ function Sidebar() {
           </NavLink>
         ))}
 
-        <button className="w-full rounded-lg px-4 py-3 text-left text-red-500 transition hover:bg-red-50">
+        {/* Updated Logout button */}
+        <button
+          onClick={handleLogout}
+          className="w-full rounded-lg px-4 py-3 text-left text-red-500 transition hover:bg-red-50"
+        >
           Logout
         </button>
       </div>

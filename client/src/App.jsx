@@ -13,6 +13,7 @@ import Discover from "./pages/Discover";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/common/ProtectedRoute";
 
 function App() {
   return (
@@ -27,54 +28,65 @@ function App() {
         <Route
           path="/app"
           element={
-            <AppLayout>
-              <Home />
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout>
+                <Home />
+              </AppLayout>
+            </ProtectedRoute>
           }
         />
-
         <Route
           path="/app/collaborate"
           element={
-            <AppLayout>
-              <Collaborations />
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout>
+                <Collaborations />
+              </AppLayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/app/events"
           element={
-            <AppLayout>
-              <Events />
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout>
+                <Events />
+              </AppLayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/app/discover"
           element={
-            <AppLayout>
-              <Discover />
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout>
+                <Discover />
+              </AppLayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/app/profile"
           element={
-            <AppLayout>
-              <Profile />
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout>
+                <Profile />
+              </AppLayout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/app/settings"
           element={
-            <AppLayout>
-              <Settings />
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout>
+                <Settings />
+              </AppLayout>
+            </ProtectedRoute>
           }
         />
 
