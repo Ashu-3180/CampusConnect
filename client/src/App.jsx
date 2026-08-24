@@ -11,6 +11,7 @@ import Collaborations from "./pages/Collaborations";
 import Events from "./pages/Events";
 import Discover from "./pages/Discover";
 import Profile from "./pages/Profile";
+import UserProfile from "./pages/UserProfile";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/common/ProtectedRoute";
@@ -74,6 +75,17 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <Profile />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/app/profile/:id"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <UserProfile />
               </AppLayout>
             </ProtectedRoute>
           }

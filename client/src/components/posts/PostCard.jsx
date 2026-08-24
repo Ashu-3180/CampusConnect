@@ -2,6 +2,8 @@ import { useState } from "react";
 
 import { useAuth } from "../../context/AuthContext";
 
+import { Link } from "react-router-dom";
+
 function PostCard({
   post,
   onLike,
@@ -79,7 +81,10 @@ function PostCard({
   return (
     <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
-        <div className="flex gap-3">
+        <Link
+          to={`/app/profile/${post.author?._id}`}
+          className="flex gap-3"
+        >
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-indigo-100 font-semibold text-indigo-600">
             {initial}
           </div>
@@ -101,7 +106,7 @@ function PostCard({
               ).toLocaleString()}
             </p>
           </div>
-        </div>
+        </Link>
 
         <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-600">
           {post.category}
