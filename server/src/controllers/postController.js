@@ -52,6 +52,28 @@ const getPosts = async (req, res, next) => {
   }
 };
 
+const getPostById = async (req, res, next) => {
+  try {
+    const post = await Post.findById(req.params.id)
+      .populate(
+        "author",
+        "name university course profileImage"
+      );
+
+    if (!post) {
+      res.status(404);
+      throw new Error("Post not found");
+    }
+
+    res.status(200).json({
+      success: true,
+      post,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const updatePost = async (req, res, next) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -226,6 +248,7 @@ const addComment = async (req, res, next) => {
 module.exports = {
   createPost,
   getPosts,
+  getPostById,
   updatePost,
   deletePost,
   toggleLike,

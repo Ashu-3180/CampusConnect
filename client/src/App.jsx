@@ -17,6 +17,7 @@ import UserProfile from "./pages/UserProfile";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import PostDetails from "./pages/PostDetails";
 
 function App() {
   return (
@@ -125,7 +126,17 @@ function App() {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/app/posts/:postId"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PostDetails />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+            
         {/* 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
