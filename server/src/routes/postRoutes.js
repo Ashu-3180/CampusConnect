@@ -6,6 +6,7 @@ const {
   updatePost,
   deletePost,
   toggleLike,
+  addComment,
 } = require("../controllers/postController");
 
 const {
@@ -28,6 +29,12 @@ router.post(
   "/:id/like",
   protect,
   toggleLike
+);
+
+router.post(
+  "/:id/comments",
+  protect,
+  addComment
 );
 
 module.exports = router;

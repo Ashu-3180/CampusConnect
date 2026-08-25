@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const Post = require("../models/Post");
+const createNotification = require("../utils/createNotification");
 
 const getMyProfile = async (req, res, next) => {
   try {

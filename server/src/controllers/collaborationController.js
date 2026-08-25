@@ -1,4 +1,5 @@
 const Collaboration = require("../models/Collaboration");
+const createNotification = require("../utils/createNotification");
 
 const createCollaboration = async (req, res, next) => {
   try {
@@ -219,6 +220,14 @@ const applyToCollaboration = async (
 
     await collaboration.save();
 
+    await createNotification({
+      recipient: collaboration.owner,
+      sender: req.user.userId,
+      type: "collaboration_application",
+      message: `applied to join "${collaboration.title}"`,
+      link: `/app/collaborations/${collaboration._id}`,
+    });
+
     res.status(200).json({
       success: true,
       message: "Application submitted successfully",
@@ -308,6 +317,16 @@ const updateApplicationStatus = async (
     }
 
     await collaboration.save();
+
+    if (status === "accepted") {
+      await createNotification({
+        recipient: application.applicant,
+        sender: req.user.userId,
+        type: "collaboration_accepted",
+        message: `accepted your application for "${collaboration.title}"`,
+        link: `/app/collaborations/${collaboration._id}`,
+      });
+    }
 
     res.status(200).json({
       success: true,
