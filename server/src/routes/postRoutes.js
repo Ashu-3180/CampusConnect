@@ -3,6 +3,7 @@ const express = require("express");
 const {
   createPost,
   getPosts,
+  getPostById,
   updatePost,
   deletePost,
   toggleLike,
@@ -22,6 +23,7 @@ router
 
 router
   .route("/:id")
+  .get(protect, getPostById)
   .put(protect, updatePost)
   .delete(protect, deletePost);
 
