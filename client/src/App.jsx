@@ -8,6 +8,8 @@ import Register from "./pages/Register";
 
 import Home from "./pages/Home";
 import Collaborations from "./pages/Collaborations";
+import CreateCollaboration from "./pages/CreateCollaboration";
+import CollaborationDetails from "./pages/CollaborationDetails";
 import Events from "./pages/Events";
 import Discover from "./pages/Discover";
 import Profile from "./pages/Profile";
@@ -37,11 +39,33 @@ function App() {
           }
         />
         <Route
-          path="/app/collaborate"
+          path="/app/collaborations"
           element={
             <ProtectedRoute>
               <AppLayout>
                 <Collaborations />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/app/collaborations/create"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <CreateCollaboration />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/app/collaborations/:id"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <CollaborationDetails />
               </AppLayout>
             </ProtectedRoute>
           }
@@ -110,3 +134,4 @@ function App() {
 }
 
 export default App;
+

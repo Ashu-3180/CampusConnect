@@ -1,12 +1,49 @@
 const express = require("express");
 
+const {
+  createCollaboration,
+  getCollaborations,
+  getCollaborationById,
+  applyToCollaboration,
+  updateApplicationStatus,
+  closeCollaboration,
+} = require(
+  "../controllers/collaborationController"
+);
+
+const {
+  protect,
+} = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  res.json({
-    success: true,
-    message: "Collaboration routes working",
-  });
-});
+router
+  .route("/")
+  .get(protect, getCollaborations)
+  .post(protect, createCollaboration);
+
+router.get(
+  "/:id",
+  protect,
+  getCollaborationById
+);
+
+router.post(
+  "/:id/apply",
+  protect,
+  applyToCollaboration
+);
+
+router.put(
+  "/:id/applications/:applicationId",
+  protect,
+  updateApplicationStatus
+);
+
+router.put(
+  "/:id/close",
+  protect,
+  closeCollaboration
+);
 
 module.exports = router;
