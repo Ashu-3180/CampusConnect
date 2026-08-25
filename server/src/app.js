@@ -11,6 +11,7 @@ const userRoutes = require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
 const collaborationRoutes = require("./routes/collaborationRoutes");
 const eventRoutes = require("./routes/eventRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/collaborations", collaborationRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/notifications",notificationRoutes);
 
 // Error handling - always last
 app.use(notFound);

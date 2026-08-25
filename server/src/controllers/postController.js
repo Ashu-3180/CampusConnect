@@ -1,4 +1,5 @@
 const Post = require("../models/Post");
+const createNotification = require("../utils/createNotification");
 
 const createPost = async (req, res, next) => {
   try {
@@ -155,6 +156,14 @@ const toggleLike = async (req, res, next) => {
       );
     } else {
       post.likes.push(userId);
+
+      await createNotification({
+        recipient: post.author,
+        sender: req.user.userId,
+        type: "post_like",
+        message: "liked your post",
+        link: `/app/posts/${post._id}`,
+      });
     }
 
     await post.save();
@@ -169,10 +178,56 @@ const toggleLike = async (req, res, next) => {
   }
 };
 
+const addComment = async (req, res, next) => {
+  try {
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      res.status(404);
+      throw new Error("Post not found");
+    }
+
+    const { text } = req.body;
+
+    if (!text || !text.trim()) {
+      res.status(400);
+      throw new Error("Comment text is required");
+    }
+
+    // Add the comment
+    post.comments.push({
+      user: req.user.userId,
+      text: text.trim(),
+    });
+
+    // Create notification for the post author
+    await createNotification({
+      recipient: post.author,
+      sender: req.user.userId,
+      type: "post_comment",
+      message: "commented on your post",
+      link: `/app/posts/${post._id}`,
+    });
+
+    // Save the post
+    await post.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Comment added successfully",
+      commentsCount: post.comments.length,
+      comments: post.comments,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createPost,
   getPosts,
   updatePost,
   deletePost,
   toggleLike,
+  addComment,
 };

@@ -1,4 +1,5 @@
 import { useAuth } from "../../context/AuthContext";
+import NotificationBell from "../notifications/NotificationBell";
 
 function Navbar() {
   const { user } = useAuth();
@@ -17,7 +18,7 @@ function Navbar() {
 
       <div className="flex items-center gap-4">
         <button className="rounded-lg p-2 text-slate-600 hover:bg-slate-100">
-          Notifications
+          <NotificationBell />
         </button>
 
         <div className="flex items-center gap-2">
