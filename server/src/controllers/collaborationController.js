@@ -374,6 +374,65 @@ const closeCollaboration = async (
   }
 };
 
+const searchCollaborations = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { query } = req.query;
+
+    if (!query || !query.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Search query is required",
+      });
+    }
+
+    const searchQuery = query.trim();
+
+    const collaborations =
+      await Collaboration.find({
+        $or: [
+          {
+            title: {
+              $regex: searchQuery,
+              $options: "i",
+            },
+          },
+          {
+            description: {
+              $regex: searchQuery,
+              $options: "i",
+            },
+          },
+          {
+            requiredSkills: {
+              $regex: searchQuery,
+              $options: "i",
+            },
+          },
+        ],
+      })
+        .populate(
+          "owner",
+          "name university profileImage"
+        )
+        .sort({
+          createdAt: -1,
+        })
+        .limit(20);
+
+    res.status(200).json({
+      success: true,
+      count: collaborations.length,
+      collaborations,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createCollaboration,
   getCollaborations,
@@ -381,4 +440,5 @@ module.exports = {
   applyToCollaboration,
   updateApplicationStatus,
   closeCollaboration,
+  searchCollaborations,
 };

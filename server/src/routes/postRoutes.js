@@ -8,6 +8,7 @@ const {
   deletePost,
   toggleLike,
   addComment,
+  searchPosts,
 } = require("../controllers/postController");
 
 const {
@@ -20,6 +21,12 @@ router
   .route("/")
   .get(protect, getPosts)
   .post(protect, createPost);
+
+router.get(
+  "/search",
+  protect,
+  searchPosts
+);
 
 router
   .route("/:id")

@@ -7,6 +7,7 @@ const {
   applyToCollaboration,
   updateApplicationStatus,
   closeCollaboration,
+  searchCollaborations,
 } = require(
   "../controllers/collaborationController"
 );
@@ -21,6 +22,12 @@ router
   .route("/")
   .get(protect, getCollaborations)
   .post(protect, createCollaboration);
+
+router.get(
+  "/search",
+  protect,
+  searchCollaborations
+);
 
 router.get(
   "/:id",
