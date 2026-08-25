@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 
 const navigation = [
   { name: "Home", path: "/app" },
-  { name: "Collaborate", path: "/app/collaborate" },
+  { name: "Collaborate", path: "/app/collaborations" },
   { name: "Events", path: "/app/events" },
   { name: "Discover", path: "/app/discover" },
 ];
