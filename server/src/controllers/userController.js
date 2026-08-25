@@ -133,6 +133,8 @@ const getUserProfile = async (
   next
 ) => {
   try {
+    const currentUserId = req.user.userId;
+
     const user = await User.findById(
       req.params.id
     ).select("-password");
@@ -141,6 +143,33 @@ const getUserProfile = async (
       res.status(404);
       throw new Error("User not found");
     }
+
+    const currentUser = await User.findById(
+      currentUserId
+    );
+
+    if (!currentUser) {
+      res.status(404);
+      throw new Error("Current user not found");
+    }
+
+    const isConnected =
+      currentUser.connections.some(
+        (userId) =>
+          userId.toString() === user._id.toString()
+      );
+
+    const requestSent =
+      currentUser.sentConnectionRequests.some(
+        (userId) =>
+          userId.toString() === user._id.toString()
+      );
+
+    const requestReceived =
+      currentUser.receivedConnectionRequests.some(
+        (userId) =>
+          userId.toString() === user._id.toString()
+      );
 
     const posts = await Post.find({
       author: user._id,
@@ -155,6 +184,11 @@ const getUserProfile = async (
       success: true,
       user,
       posts,
+      connectionStatus: {
+        isConnected,
+        requestSent,
+        requestReceived,
+      },
     });
   } catch (error) {
     next(error);

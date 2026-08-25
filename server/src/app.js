@@ -12,6 +12,7 @@ const postRoutes = require("./routes/postRoutes");
 const collaborationRoutes = require("./routes/collaborationRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
+const connectionRoutes = require("./routes/connectionRoutes");
 
 const app = express();
 
@@ -28,13 +29,13 @@ app.get("/", (req, res) => {
 });
 
 // API Routes
-app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/collaborations", collaborationRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/notifications",notificationRoutes);
+app.use("/api/connections",connectionRoutes);
 
 // Error handling - always last
 app.use(notFound);

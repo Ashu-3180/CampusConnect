@@ -6,6 +6,8 @@ const navigation = [
   { name: "Collaborate", path: "/app/collaborations" },
   { name: "Events", path: "/app/events" },
   { name: "Discover", path: "/app/discover" },
+  { name: "Search", path: "/app/search" },
+  { name: "My Network", path: "/app/network" },
 ];
 
 const bottomNavigation = [

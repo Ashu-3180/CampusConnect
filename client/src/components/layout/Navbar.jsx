@@ -17,9 +17,7 @@ function Navbar() {
       </div>
 
       <div className="flex items-center gap-4">
-        <button className="rounded-lg p-2 text-slate-600 hover:bg-slate-100">
-          <NotificationBell />
-        </button>
+        <NotificationBell />
 
         <div className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 font-semibold text-indigo-600">

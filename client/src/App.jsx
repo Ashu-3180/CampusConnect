@@ -12,6 +12,8 @@ import CreateCollaboration from "./pages/CreateCollaboration";
 import CollaborationDetails from "./pages/CollaborationDetails";
 import Events from "./pages/Events";
 import Discover from "./pages/Discover";
+import SearchPage from "./pages/SearchPage";
+import Network from "./pages/Network";
 import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
 import Settings from "./pages/Settings";
@@ -89,6 +91,28 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <Discover />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/app/search"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <SearchPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/app/network"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Network />
               </AppLayout>
             </ProtectedRoute>
           }

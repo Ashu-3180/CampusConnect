@@ -245,6 +245,40 @@ const addComment = async (req, res, next) => {
   }
 };
 
+const searchPosts = async (req, res, next) => {
+  try {
+    const { query } = req.query;
+
+    if (!query || !query.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Search query is required",
+      });
+    }
+
+    const posts = await Post.find({
+      content: {
+        $regex: query.trim(),
+        $options: "i",
+      },
+    })
+      .populate(
+        "author",
+        "name university course profileImage"
+      )
+      .sort({ createdAt: -1 })
+      .limit(20);
+
+    res.status(200).json({
+      success: true,
+      count: posts.length,
+      posts,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createPost,
   getPosts,
@@ -253,4 +287,5 @@ module.exports = {
   deletePost,
   toggleLike,
   addComment,
+  searchPosts,
 };
