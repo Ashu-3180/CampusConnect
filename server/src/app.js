@@ -13,11 +13,18 @@ const collaborationRoutes = require("./routes/collaborationRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const connectionRoutes = require("./routes/connectionRoutes");
+const messageRoutes = require("./routes/messageRoutes");
 
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 // Health check
@@ -36,6 +43,7 @@ app.use("/api/collaborations", collaborationRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/notifications",notificationRoutes);
 app.use("/api/connections",connectionRoutes);
+app.use("/api/messages", messageRoutes);
 
 // Error handling - always last
 app.use(notFound);

@@ -1,5 +1,9 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+
 import { useAuth } from "../../context/AuthContext";
+import messageService from "../../services/messageService";
+import socket from "../../socket/socket";
 
 const navigation = [
   { name: "Home", path: "/app" },
@@ -8,6 +12,7 @@ const navigation = [
   { name: "Discover", path: "/app/discover" },
   { name: "Search", path: "/app/search" },
   { name: "My Network", path: "/app/network" },
+  { name: "Messages", path: "/app/messages" },
 ];
 
 const bottomNavigation = [
@@ -19,6 +24,63 @@ function Sidebar() {
   // Add these
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const loadUnreadCount = async () => {
+      try {
+        const conversations =
+          await messageService.getConversations();
+
+        const totalUnread =
+          conversations.reduce(
+            (total, conversation) =>
+              total + (conversation.unreadCount || 0),
+            0
+          );
+
+        setUnreadCount(totalUnread);
+      } catch (error) {
+        console.error(
+          "Failed to load unread messages:",
+          error
+        );
+      }
+    };
+
+    loadUnreadCount();
+
+    const handleNewMessage = () => {
+      loadUnreadCount();
+    };
+
+    const handleMessagesRead = () => {
+      loadUnreadCount();
+    };
+
+    socket.on(
+      "newMessage",
+      handleNewMessage
+    );
+
+    window.addEventListener(
+      "messagesRead",
+      handleMessagesRead
+    );
+
+    return () => {
+      socket.off(
+        "newMessage",
+        handleNewMessage
+      );
+
+      window.removeEventListener(
+        "messagesRead",
+        handleMessagesRead
+      );
+    };
+  }, [location.pathname]);
 
   // Add this function
   const handleLogout = () => {
@@ -34,7 +96,7 @@ function Sidebar() {
     }`;
 
   return (
-    <aside className="flex min-h-screen w-64 flex-col border-r border-slate-200 bg-white p-4">
+    <aside className="hidden min-h-screen w-64 flex-col border-r border-slate-200 bg-white p-4 md:flex">
       <div className="mb-10 px-2">
         <h1 className="text-2xl font-bold text-indigo-600">
           CampusConnect
@@ -52,7 +114,18 @@ function Sidebar() {
             to={item.path}
             className={linkClasses}
           >
-            {item.name}
+            <div className="flex items-center justify-between">
+              <span>{item.name}</span>
+
+              {item.name === "Messages" &&
+                unreadCount > 0 && (
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-semibold text-white">
+                    {unreadCount > 99
+                      ? "99+"
+                      : unreadCount}
+                  </span>
+                )}
+            </div>
           </NavLink>
         ))}
       </nav>
