@@ -3,16 +3,22 @@ import Navbar from "./Navbar";
 
 function AppLayout({ children }) {
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
+    <div className="min-h-screen bg-slate-50">
+      
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:block">
+        <Sidebar />
+      </div>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      {/* Main Application Area */}
+      <div className="min-h-screen lg:ml-64">
         <Navbar />
 
-        <main className="flex-1 p-6 lg:p-8">
+        <main className="min-w-0 p-4 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>
+      
     </div>
   );
 }

@@ -239,60 +239,70 @@ function Network() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 
             {connections.map((user) => (
-              <Link
+              <div
                 key={user._id}
-                to={`/app/profile/${user._id}`}
                 className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md"
               >
+                <Link
+                  to={`/app/profile/${user._id}`}
+                  className="block"
+                >
+                  <div className="flex items-center gap-3">
 
-                <div className="flex items-center gap-3">
+                    {user.profileImage ? (
+                      <img
+                        src={user.profileImage}
+                        alt={user.name}
+                        className="h-14 w-14 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-xl">
+                        👤
+                      </div>
+                    )}
 
-                  {user.profileImage ? (
-                    <img
-                      src={user.profileImage}
-                      alt={user.name}
-                      className="h-14 w-14 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-xl">
-                      👤
+                    <div>
+                      <h3 className="font-semibold text-slate-800">
+                        {user.name}
+                      </h3>
+
+                      <p className="text-sm text-slate-500">
+                        {user.university}
+                      </p>
+
+                      <p className="text-sm text-slate-500">
+                        {user.course}
+                      </p>
+                    </div>
+
+                  </div>
+
+                  {user.skills?.length > 0 && (
+                    <div className="mt-4 flex flex-wrap gap-2">
+
+                      {user.skills
+                        .slice(0, 5)
+                        .map((skill) => (
+                          <span
+                            key={skill}
+                            className="rounded-full bg-green-50 px-3 py-1 text-xs text-green-600"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+
                     </div>
                   )}
+                </Link>
 
-                  <div>
-                    <h3 className="font-semibold text-slate-800">
-                      {user.name}
-                    </h3>
+                <Link
+                  to={`/app/messages/${user._id}`}
+                  className="mt-5 block rounded-lg bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white transition hover:bg-indigo-700"
+                >
+                  Message
+                </Link>
 
-                    <p className="text-sm text-slate-500">
-                      {user.university}
-                    </p>
-
-                    <p className="text-sm text-slate-500">
-                      {user.course}
-                    </p>
-                  </div>
-
-                </div>
-
-                {user.skills?.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-2">
-
-                    {user.skills
-                      .slice(0, 5)
-                      .map((skill) => (
-                        <span
-                          key={skill}
-                          className="rounded-full bg-green-50 px-3 py-1 text-xs text-green-600"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-
-                  </div>
-                )}
-
-              </Link>
+              </div>
             ))}
 
           </div>

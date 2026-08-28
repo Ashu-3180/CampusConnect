@@ -1,6 +1,6 @@
 import postService from "../services/postService";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import userService from "../services/userService";
 import PostCard from "../components/posts/PostCard";
@@ -8,6 +8,7 @@ import connectionService from "../services/connectionService";
 
 function UserProfile() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
@@ -130,6 +131,10 @@ function UserProfile() {
     }
   };
 
+  const handleMessage = () => {
+    navigate(`/app/messages/${id}`);
+  };
+
 
   if (loading) {
     return (
@@ -184,12 +189,18 @@ function UserProfile() {
 
       <div className="flex shrink-0 gap-2">
         {connectionStatus.isConnected ? (
-          <button
-            disabled
-            className="rounded-lg bg-green-100 px-4 py-2 text-sm font-medium text-green-700"
-          >
-            Connected ✓
-          </button>
+          <>
+            <div className="rounded-lg bg-green-100 px-4 py-2 text-sm font-medium text-green-700">
+              Connected ✓
+            </div>
+
+            <button
+              onClick={handleMessage}
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            >
+              Message
+            </button>
+          </>
         ) : connectionStatus.requestSent ? (
           <button
             onClick={handleCancelRequest}

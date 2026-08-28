@@ -14,6 +14,8 @@ import Events from "./pages/Events";
 import Discover from "./pages/Discover";
 import SearchPage from "./pages/SearchPage";
 import Network from "./pages/Network";
+import Messages from "./pages/Messages";
+import Chat from "./pages/Chat";
 import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
 import Settings from "./pages/Settings";
@@ -113,6 +115,28 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <Network />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/app/messages"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Messages />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/app/messages/:userId"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Chat />
               </AppLayout>
             </ProtectedRoute>
           }

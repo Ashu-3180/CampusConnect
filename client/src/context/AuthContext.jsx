@@ -6,6 +6,7 @@ import {
 } from "react";
 
 import authService from "../services/authService";
+import socket from "../socket/socket";
 
 const AuthContext = createContext();
 
@@ -28,6 +29,12 @@ export function AuthProvider({ children }) {
           await authService.getCurrentUser(token);
 
         setUser(data.user);
+
+        socket.auth = {
+          userId: data.user._id,
+        };
+
+        socket.connect();
       } catch (error) {
         localStorage.removeItem("token");
         setUser(null);
@@ -47,6 +54,12 @@ export function AuthProvider({ children }) {
 
     setUser(data.user);
 
+    socket.auth = {
+      userId: data.user._id,
+    };
+
+    socket.connect();
+
     return data;
   };
 
@@ -58,10 +71,18 @@ export function AuthProvider({ children }) {
 
     setUser(data.user);
 
+    socket.auth = {
+      userId: data.user._id,
+    };
+
+    socket.connect();
+
     return data;
   };
 
   const logout = () => {
+    socket.disconnect();
+
     localStorage.removeItem("token");
 
     setUser(null);
