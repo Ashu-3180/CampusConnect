@@ -92,17 +92,17 @@ function Sidebar() {
     `block rounded-lg px-4 py-3 transition ${
       isActive
         ? "bg-indigo-600 text-white"
-        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
     }`;
 
   return (
-    <aside className="hidden min-h-screen w-64 flex-col border-r border-slate-200 bg-white p-4 md:flex">
+    <aside className="hidden min-h-screen w-64 flex-col border-r border-slate-200 bg-white p-4 transition-colors dark:border-slate-800 dark:bg-slate-950 md:flex">
       <div className="mb-10 px-2">
         <h1 className="text-2xl font-bold text-indigo-600">
           CampusConnect
         </h1>
 
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Connect. Collaborate. Grow.
         </p>
       </div>
@@ -144,7 +144,7 @@ function Sidebar() {
         {/* Updated Logout button */}
         <button
           onClick={handleLogout}
-          className="w-full rounded-lg px-4 py-3 text-left text-red-500 transition hover:bg-red-50"
+          className="w-full rounded-lg px-4 py-3 text-left text-red-500 transition hover:bg-red-50 dark:hover:bg-red-950/40"
         >
           Logout
         </button>

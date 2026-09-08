@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useAuth } from "../context/AuthContext";
 import userService from "../services/userService";
@@ -18,11 +18,18 @@ function Profile() {
     skills: "",
     github: "",
     linkedin: "",
+    profileImage: "",
   });
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] =
+    useState(false);
+
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -34,14 +41,18 @@ function Profile() {
 
         setFormData({
           name: data.user.name || "",
-          university: data.user.university || "",
+          university:
+            data.user.university || "",
           course: data.user.course || "",
           graduationYear:
             data.user.graduationYear || "",
           bio: data.user.bio || "",
-          skills: data.user.skills?.join(", ") || "",
+          skills:
+            data.user.skills?.join(", ") || "",
           github: data.user.github || "",
           linkedin: data.user.linkedin || "",
+          profileImage:
+            data.user.profileImage || "",
         });
       } catch (error) {
         setError(error.message);
@@ -60,11 +71,86 @@ function Profile() {
     });
   };
 
+  const handleProfileImageChange = async (
+    event
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/gif",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setError(
+        "Only JPG, PNG, WEBP and GIF images are allowed."
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError(
+        "Profile photo must be smaller than 5 MB."
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+      setError("");
+      setSuccess("");
+
+      const data =
+        await userService.uploadProfileImage(
+          file
+        );
+
+      setProfile(data.user);
+      updateUser(data.user);
+
+      setFormData((previous) => ({
+        ...previous,
+        profileImage:
+          data.user.profileImage || "",
+      }));
+
+      setSuccess(
+        "Profile photo uploaded successfully."
+      );
+
+      setTimeout(() => {
+        setSuccess("");
+      }, 3000);
+    } catch (error) {
+      setError(
+        error.message ||
+          "Failed to upload profile photo."
+      );
+    } finally {
+      setUploadingImage(false);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     setSaving(true);
     setError("");
+    setSuccess("");
 
     try {
       const profileData = {
@@ -87,6 +173,14 @@ function Profile() {
       updateUser(data.user);
 
       setEditing(false);
+
+      setSuccess(
+        "Profile updated successfully."
+      );
+
+      setTimeout(() => {
+        setSuccess("");
+      }, 3000);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -96,7 +190,7 @@ function Profile() {
 
   if (loading) {
     return (
-      <div className="py-10 text-center text-slate-500">
+      <div className="py-10 text-center text-slate-500 dark:text-slate-400">
         Loading profile...
       </div>
     );
@@ -104,7 +198,7 @@ function Profile() {
 
   if (!profile) {
     return (
-      <div className="py-10 text-center text-red-500">
+      <div className="py-10 text-center text-red-500 dark:text-red-400">
         {error || "Profile not found"}
       </div>
     );
@@ -115,58 +209,119 @@ function Profile() {
     : "U";
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      {/* Profile Card */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
 
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
 
-          <div className="flex gap-5">
+          {/* Identity */}
+          <div className="flex items-center gap-5">
 
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-3xl font-bold text-indigo-600">
-              {initial}
+            <div className="relative shrink-0">
+
+              {profile.profileImage ? (
+                <img
+                  src={profile.profileImage}
+                  alt={profile.name}
+                  className="h-28 w-28 rounded-full object-cover object-center ring-4 ring-indigo-50 shadow-md dark:ring-indigo-500/10"
+                />
+              ) : (
+                <div className="flex h-28 w-28 items-center justify-center rounded-full bg-indigo-100 text-4xl font-bold text-indigo-600 ring-4 ring-indigo-50 shadow-md dark:bg-indigo-500/20 dark:text-indigo-300 dark:ring-indigo-500/10">
+                  {initial}
+                </div>
+              )}
+
+              {/* Change photo button */}
+              {editing && (
+                <>
+                  <button
+                    type="button"
+                    disabled={uploadingImage}
+                    onClick={() =>
+                      fileInputRef.current?.click()
+                    }
+                    className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-indigo-600 text-base shadow-lg transition hover:scale-105 hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-900"
+                    title="Change profile photo"
+                  >
+                    {uploadingImage
+                      ? "…"
+                      : "📷"}
+                  </button>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={
+                      handleProfileImageChange
+                    }
+                    className="hidden"
+                  />
+                </>
+              )}
+
             </div>
 
             <div>
-
-              <h1 className="text-2xl font-bold text-slate-900">
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
                 {profile.name}
               </h1>
 
-              <p className="mt-1 text-slate-500">
+              <p className="mt-1 text-slate-600 dark:text-slate-300">
                 {profile.course}
               </p>
 
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-slate-400 dark:text-slate-500">
                 {profile.university}
               </p>
 
-              <p className="text-sm text-slate-400">
-                Graduating {profile.graduationYear}
+              <p className="text-sm text-slate-400 dark:text-slate-500">
+                Graduating{" "}
+                {profile.graduationYear}
               </p>
-
             </div>
 
           </div>
 
+          {/* Edit button */}
           <button
-            onClick={() => setEditing(!editing)}
-            className="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700"
+            type="button"
+            onClick={() => {
+              setEditing(!editing);
+              setError("");
+              setSuccess("");
+            }}
+            className="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white transition hover:bg-indigo-700"
           >
-            {editing ? "Cancel" : "Edit Profile"}
+            {editing
+              ? "Cancel Editing"
+              : "Edit Profile"}
           </button>
 
         </div>
 
+        {/* About */}
         {profile.bio && (
-          <p className="mt-6 border-t border-slate-100 pt-5 leading-relaxed text-slate-600">
-            {profile.bio}
-          </p>
+          <div className="mt-6 border-t border-slate-100 pt-5 dark:border-slate-800">
+
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+              About
+            </h3>
+
+            <p className="mt-2 leading-relaxed text-slate-600 dark:text-slate-300">
+              {profile.bio}
+            </p>
+
+          </div>
         )}
 
+        {/* Skills */}
         {profile.skills?.length > 0 && (
           <div className="mt-6">
-            <h3 className="mb-3 font-semibold text-slate-800">
+
+            <h3 className="mb-3 font-semibold text-slate-800 dark:text-white">
               Skills
             </h3>
 
@@ -174,26 +329,29 @@ function Profile() {
               {profile.skills.map((skill) => (
                 <span
                   key={skill}
-                  className="rounded-full bg-indigo-50 px-3 py-1 text-sm text-indigo-600"
+                  className="rounded-full bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300"
                 >
                   {skill}
                 </span>
               ))}
             </div>
+
           </div>
         )}
 
-        {(profile.github || profile.linkedin) && (
-          <div className="mt-6 flex flex-wrap gap-4">
+        {/* Social links */}
+        {(profile.github ||
+          profile.linkedin) && (
+          <div className="mt-6 flex flex-wrap gap-4 border-t border-slate-100 pt-5 dark:border-slate-800">
 
             {profile.github && (
               <a
                 href={profile.github}
                 target="_blank"
                 rel="noreferrer"
-                className="text-sm font-medium text-indigo-600 hover:underline"
+                className="text-sm font-medium text-indigo-600 transition hover:text-indigo-700 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
               >
-                GitHub
+                GitHub ↗
               </a>
             )}
 
@@ -202,37 +360,55 @@ function Profile() {
                 href={profile.linkedin}
                 target="_blank"
                 rel="noreferrer"
-                className="text-sm font-medium text-indigo-600 hover:underline"
+                className="text-sm font-medium text-indigo-600 transition hover:text-indigo-700 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
               >
-                LinkedIn
+                LinkedIn ↗
               </a>
             )}
 
           </div>
         )}
 
-      </div>
+      </section>
 
+      {/* Success */}
+      {success && (
+        <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700 dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-300">
+          {success}
+        </div>
+      )}
+
+      {/* Edit Profile Form */}
       {editing && (
         <form
           onSubmit={handleSubmit}
-          className="space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+          className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900"
         >
 
-          <h2 className="text-xl font-bold text-slate-900">
-            Edit Profile
-          </h2>
+          <div className="border-b border-slate-100 pb-4 dark:border-slate-800">
 
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+              Edit Profile
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Keep your CampusConnect profile up to date.
+            </p>
+
+          </div>
+
+          {/* Form error */}
           {error && (
-            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
               {error}
             </div>
           )}
 
+          {/* Basic information */}
           <div className="grid gap-5 md:grid-cols-2">
 
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
                 Name
               </label>
 
@@ -242,12 +418,12 @@ function Profile() {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-indigo-500"
+                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-indigo-500/20"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
                 University
               </label>
 
@@ -257,12 +433,12 @@ function Profile() {
                 value={formData.university}
                 onChange={handleChange}
                 required
-                className="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-indigo-500"
+                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-indigo-500/20"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
                 Course
               </label>
 
@@ -272,12 +448,12 @@ function Profile() {
                 value={formData.course}
                 onChange={handleChange}
                 required
-                className="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-indigo-500"
+                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-indigo-500/20"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
                 Graduation Year
               </label>
 
@@ -285,16 +461,19 @@ function Profile() {
                 type="number"
                 name="graduationYear"
                 value={formData.graduationYear}
+                min="2000"
+                max="2100"
                 onChange={handleChange}
                 required
-                className="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-indigo-500"
+                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-indigo-500/20"
               />
             </div>
 
           </div>
 
+          {/* Bio */}
           <div>
-            <label className="mb-1 block text-sm font-medium">
+            <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
               Bio
             </label>
 
@@ -303,14 +482,15 @@ function Profile() {
               value={formData.bio}
               onChange={handleChange}
               maxLength="500"
-              rows="4"
+              rows="5"
               placeholder="Tell other students about yourself..."
-              className="w-full resize-none rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+              className="w-full resize-none rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
             />
           </div>
 
+          {/* Skills */}
           <div>
-            <label className="mb-1 block text-sm font-medium">
+            <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
               Skills
             </label>
 
@@ -320,18 +500,52 @@ function Profile() {
               value={formData.skills}
               onChange={handleChange}
               placeholder="React, Java, Python, MongoDB"
-              className="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-indigo-500"
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
             />
 
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1.5 text-xs text-slate-400 dark:text-slate-500">
               Separate skills with commas.
             </p>
           </div>
 
+          {/* Profile photo */}
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 transition-colors dark:border-slate-800 dark:bg-slate-950">
+
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+              <div>
+                <h3 className="font-medium text-slate-800 dark:text-slate-100">
+                  Profile Photo
+                </h3>
+
+                <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                  Choose a photo from your gallery or files.
+                  JPG, PNG, WEBP or GIF, max 5 MB.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                disabled={uploadingImage}
+                onClick={() =>
+                  fileInputRef.current?.click()
+                }
+                className="rounded-lg border border-indigo-200 bg-white px-4 py-2 text-sm font-medium text-indigo-600 transition hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-900/60 dark:bg-slate-900 dark:text-indigo-400 dark:hover:bg-indigo-950/30"
+              >
+                {uploadingImage
+                  ? "Uploading..."
+                  : "Choose Photo"}
+              </button>
+
+            </div>
+
+          </div>
+
+          {/* Social URLs */}
           <div className="grid gap-5 md:grid-cols-2">
 
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
                 GitHub URL
               </label>
 
@@ -341,12 +555,12 @@ function Profile() {
                 value={formData.github}
                 onChange={handleChange}
                 placeholder="https://github.com/username"
-                className="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-indigo-500"
+                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
                 LinkedIn URL
               </label>
 
@@ -356,21 +570,38 @@ function Profile() {
                 value={formData.linkedin}
                 onChange={handleChange}
                 placeholder="https://linkedin.com/in/username"
-                className="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-indigo-500"
+                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
               />
             </div>
 
           </div>
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="rounded-lg bg-indigo-600 px-5 py-3 font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
-          >
-            {saving
-              ? "Saving..."
-              : "Save Changes"}
-          </button>
+          {/* Actions */}
+          <div className="flex flex-col gap-3 border-t border-slate-100 pt-5 dark:border-slate-800 sm:flex-row">
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="rounded-lg bg-indigo-600 px-5 py-3 font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {saving
+                ? "Saving..."
+                : "Save Changes"}
+            </button>
+
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => {
+                setEditing(false);
+                setError("");
+              }}
+              className="rounded-lg border border-slate-300 px-5 py-3 font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              Cancel
+            </button>
+
+          </div>
 
         </form>
       )}
