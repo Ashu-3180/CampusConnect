@@ -37,7 +37,7 @@ function CreatePost({ onCreatePost }) {
   };
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
       <form onSubmit={handleSubmit}>
         <textarea
           value={content}
@@ -47,7 +47,7 @@ function CreatePost({ onCreatePost }) {
           placeholder="Share something with your campus..."
           maxLength="1000"
           rows="4"
-          className="w-full resize-none rounded-lg border border-slate-200 p-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+          className="w-full resize-none rounded-lg border border-slate-200 bg-white p-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
         />
 
         <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -57,7 +57,7 @@ function CreatePost({ onCreatePost }) {
               onChange={(event) =>
                 setCategory(event.target.value)
               }
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition-colors focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
             >
               <option value="General">
                 General
@@ -95,7 +95,7 @@ function CreatePost({ onCreatePost }) {
         </div>
 
         {error && (
-          <p className="mt-3 text-sm text-red-500">
+          <p className="mt-3 text-sm text-red-500 dark:text-red-400">
             {error}
           </p>
         )}

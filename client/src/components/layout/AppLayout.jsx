@@ -3,7 +3,7 @@ import Navbar from "./Navbar";
 
 function AppLayout({ children }) {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 transition-colors dark:bg-slate-950">
       
       {/* Desktop Sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:block">
@@ -11,10 +11,10 @@ function AppLayout({ children }) {
       </div>
 
       {/* Main Application Area */}
-      <div className="min-h-screen lg:ml-64">
+      <div className="min-h-screen bg-slate-50 lg:ml-64 dark:bg-slate-950">
         <Navbar />
 
-        <main className="min-w-0 p-4 sm:p-6 lg:p-8">
+        <main className="min-w-0 bg-slate-50 p-4 sm:p-6 lg:p-8 dark:bg-slate-950">
           {children}
         </main>
       </div>

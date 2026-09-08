@@ -1,3 +1,7 @@
+const path = require("path");
+const fs = require("fs");
+const sharp = require("sharp");
+
 const User = require("../models/User");
 const Post = require("../models/Post");
 const createNotification = require("../utils/createNotification");
@@ -72,14 +76,131 @@ const updateMyProfile = async (
   }
 };
 
+const getMyPreferences = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const user = await User.findById(
+      req.user.userId
+    ).select("preferences");
+
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+
+    res.status(200).json({
+      success: true,
+      preferences: user.preferences,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateMyPreferences = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const {
+      darkMode,
+      emailNotifications,
+      profileVisibility,
+    } = req.body;
+
+    const updates = {};
+
+    if (darkMode !== undefined) {
+      updates["preferences.darkMode"] = Boolean(
+        darkMode
+      );
+    }
+
+    if (emailNotifications !== undefined) {
+      updates[
+        "preferences.emailNotifications"
+      ] = Boolean(emailNotifications);
+    }
+
+    if (profileVisibility !== undefined) {
+      const allowedVisibility = [
+        "everyone",
+        "connections",
+        "only-me",
+      ];
+
+      if (
+        !allowedVisibility.includes(
+          profileVisibility
+        )
+      ) {
+        res.status(400);
+        throw new Error(
+          "Invalid profile visibility option"
+        );
+      }
+
+      updates[
+        "preferences.profileVisibility"
+      ] = profileVisibility;
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user.userId,
+      {
+        $set: updates,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).select("preferences");
+
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Preferences updated successfully",
+      preferences: user.preferences,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getStudents = async (req, res, next) => {
   try {
     const { search } = req.query;
+
+    const currentUser = await User.findById(
+      req.user.userId
+    ).select("connections");
 
     const query = {
       _id: {
         $ne: req.user.userId,
       },
+      $or: [
+        {
+          "preferences.profileVisibility":
+            "everyone",
+        },
+        {
+          "preferences.profileVisibility":
+            "connections",
+          _id: {
+            $in: currentUser?.connections || [],
+            $ne: req.user.userId,
+          },
+        },
+      ],
     };
 
     if (search && search.trim()) {
@@ -153,22 +274,55 @@ const getUserProfile = async (
       throw new Error("Current user not found");
     }
 
+    // The user can always view their own profile.
+    const isOwnProfile =
+      currentUserId.toString() ===
+      user._id.toString();
+
     const isConnected =
       currentUser.connections.some(
         (userId) =>
-          userId.toString() === user._id.toString()
+          userId.toString() ===
+          user._id.toString()
       );
+
+    const profileVisibility =
+      user.preferences?.profileVisibility ||
+      "everyone";
+
+    if (
+      !isOwnProfile &&
+      profileVisibility === "only-me"
+    ) {
+      res.status(403);
+      throw new Error(
+        "This profile is private."
+      );
+    }
+
+    if (
+      !isOwnProfile &&
+      profileVisibility === "connections" &&
+      !isConnected
+    ) {
+      res.status(403);
+      throw new Error(
+        "This profile is visible to connections only."
+      );
+    }
 
     const requestSent =
       currentUser.sentConnectionRequests.some(
         (userId) =>
-          userId.toString() === user._id.toString()
+          userId.toString() ===
+          user._id.toString()
       );
 
     const requestReceived =
       currentUser.receivedConnectionRequests.some(
         (userId) =>
-          userId.toString() === user._id.toString()
+          userId.toString() ===
+          user._id.toString()
       );
 
     const posts = await Post.find({
@@ -195,9 +349,75 @@ const getUserProfile = async (
   }
 };
 
+const uploadProfileImage = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      res.status(400);
+      throw new Error("Please select an image to upload");
+    }
+
+    const uploadDirectory = path.join(
+      __dirname,
+      "../../uploads/profile-images"
+    );
+
+    fs.mkdirSync(uploadDirectory, {
+      recursive: true,
+    });
+
+    const fileName = `profile-${req.user.userId}-${Date.now()}.webp`;
+
+    const outputPath = path.join(
+      uploadDirectory,
+      fileName
+    );
+
+    await sharp(req.file.buffer)
+      .resize(512, 512, {
+        fit: "cover",
+        position: "center",
+      })
+      .webp({
+        quality: 90,
+      })
+      .toFile(outputPath);
+
+    const imageUrl = `${req.protocol}://${req.get(
+      "host"
+    )}/uploads/profile-images/${fileName}`;
+
+    const user = await User.findByIdAndUpdate(
+      req.user.userId,
+      {
+        profileImage: imageUrl,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).select("-password");
+
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Profile image uploaded successfully",
+      user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getMyProfile,
   updateMyProfile,
+  getMyPreferences,
+  updateMyPreferences,
   getStudents,
   getUserProfile,
+  uploadProfileImage,
 };

@@ -8,15 +8,12 @@ function CollaborationDetails() {
   const { id } = useParams();
   const { user } = useAuth();
 
-  const [collaboration, setCollaboration] =
-    useState(null);
+  const [collaboration, setCollaboration] = useState(null);
 
   const [message, setMessage] = useState("");
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [submitting, setSubmitting] =
-    useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const [error, setError] = useState("");
 
@@ -25,9 +22,7 @@ function CollaborationDetails() {
       setLoading(true);
 
       const data =
-        await collaborationService.getCollaborationById(
-          id
-        );
+        await collaborationService.getCollaborationById(id);
 
       setCollaboration(data.collaboration);
     } catch (error) {
@@ -82,9 +77,7 @@ function CollaborationDetails() {
 
   const handleClose = async () => {
     try {
-      await collaborationService.closeCollaboration(
-        id
-      );
+      await collaborationService.closeCollaboration(id);
 
       await loadCollaboration();
     } catch (error) {
@@ -94,7 +87,7 @@ function CollaborationDetails() {
 
   if (loading) {
     return (
-      <div className="py-10 text-center text-slate-500">
+      <div className="py-10 text-center text-slate-500 dark:text-slate-400">
         Loading project...
       </div>
     );
@@ -102,7 +95,7 @@ function CollaborationDetails() {
 
   if (!collaboration) {
     return (
-      <div className="py-10 text-center text-red-500">
+      <div className="py-10 text-center text-red-500 dark:text-red-400">
         {error || "Collaboration not found"}
       </div>
     );
@@ -130,16 +123,17 @@ function CollaborationDetails() {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6">
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      {/* MAIN PROJECT DETAILS */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
               {collaboration.title}
             </h1>
 
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
               Created by{" "}
               {collaboration.owner?.name}
             </p>
@@ -148,8 +142,8 @@ function CollaborationDetails() {
           <span
             className={`w-fit rounded-full px-3 py-1 text-sm font-medium ${
               collaboration.status === "open"
-                ? "bg-green-100 text-green-700"
-                : "bg-slate-100 text-slate-600"
+                ? "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400"
+                : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
             }`}
           >
             {collaboration.status}
@@ -157,15 +151,14 @@ function CollaborationDetails() {
 
         </div>
 
-        <p className="mt-6 whitespace-pre-line leading-relaxed text-slate-600">
+        <p className="mt-6 whitespace-pre-line leading-relaxed text-slate-600 dark:text-slate-300">
           {collaboration.description}
         </p>
 
-        {collaboration.requiredSkills?.length >
-          0 && (
+        {collaboration.requiredSkills?.length > 0 && (
           <div className="mt-6">
 
-            <h3 className="mb-3 font-semibold">
+            <h3 className="mb-3 font-semibold text-slate-900 dark:text-white">
               Required Skills
             </h3>
 
@@ -175,7 +168,7 @@ function CollaborationDetails() {
                 (skill) => (
                   <span
                     key={skill}
-                    className="rounded-full bg-indigo-50 px-3 py-1 text-sm text-indigo-600"
+                    className="rounded-full bg-indigo-50 px-3 py-1 text-sm text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300"
                   >
                     {skill}
                   </span>
@@ -187,9 +180,9 @@ function CollaborationDetails() {
           </div>
         )}
 
-        <div className="mt-6 border-t border-slate-100 pt-5">
+        <div className="mt-6 border-t border-slate-100 pt-5 dark:border-slate-800">
 
-          <h3 className="font-semibold text-slate-800">
+          <h3 className="font-semibold text-slate-800 dark:text-white">
             Team Members (
             {collaboration.members.length}/
             {collaboration.maxMembers})
@@ -201,13 +194,13 @@ function CollaborationDetails() {
               (member) => (
                 <div
                   key={member._id}
-                  className="rounded-lg bg-slate-50 p-3"
+                  className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950"
                 >
-                  <p className="font-medium text-slate-800">
+                  <p className="font-medium text-slate-800 dark:text-slate-100">
                     {member.name}
                   </p>
 
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     {member.course}
                   </p>
                 </div>
@@ -220,21 +213,21 @@ function CollaborationDetails() {
 
       </div>
 
+      {/* ERROR */}
       {error && (
-        <div className="rounded-lg bg-red-50 p-4 text-red-600">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-600 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
           {error}
         </div>
       )}
 
       {/* OWNER CONTROLS */}
-
       {isOwner &&
         collaboration.status === "open" && (
           <div className="flex justify-end">
 
             <button
               onClick={handleClose}
-              className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+              className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 dark:border-red-900/60 dark:text-red-400 dark:hover:bg-red-950/40"
             >
               Close Collaboration
             </button>
@@ -243,7 +236,6 @@ function CollaborationDetails() {
         )}
 
       {/* APPLY SECTION */}
-
       {!isOwner &&
         !isMember &&
         !userApplication &&
@@ -251,14 +243,14 @@ function CollaborationDetails() {
         !teamFull && (
           <form
             onSubmit={handleApply}
-            className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900"
           >
 
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
               Join this Project
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Introduce yourself and explain why you would be a good teammate.
             </p>
 
@@ -270,13 +262,13 @@ function CollaborationDetails() {
               maxLength="500"
               rows="4"
               placeholder="Example: I have experience with React and would love to contribute to the frontend..."
-              className="mt-4 w-full resize-none rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+              className="mt-4 w-full resize-none rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
             />
 
             <button
               type="submit"
               disabled={submitting}
-              className="mt-4 rounded-lg bg-indigo-600 px-5 py-3 font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+              className="mt-4 rounded-lg bg-indigo-600 px-5 py-3 font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitting
                 ? "Submitting..."
@@ -286,10 +278,11 @@ function CollaborationDetails() {
           </form>
         )}
 
+      {/* USER APPLICATION STATUS */}
       {userApplication && (
-        <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-5">
+        <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5 dark:border-indigo-900/50 dark:bg-indigo-950/30">
 
-          <p className="font-medium text-indigo-700">
+          <p className="font-medium text-indigo-700 dark:text-indigo-300">
             Application Status:{" "}
             {userApplication.status}
           </p>
@@ -297,25 +290,24 @@ function CollaborationDetails() {
         </div>
       )}
 
+      {/* MEMBER STATUS */}
       {isMember && !isOwner && (
-        <div className="rounded-xl border border-green-100 bg-green-50 p-5 text-green-700">
+        <div className="rounded-2xl border border-green-200 bg-green-50 p-5 text-green-700 dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-300">
           You are a member of this collaboration.
         </div>
       )}
 
       {/* OWNER APPLICATION MANAGEMENT */}
-
       {isOwner && (
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
 
-          <h2 className="text-xl font-bold text-slate-900">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
             Applications (
             {collaboration.applications.length})
           </h2>
 
-          {collaboration.applications.length ===
-          0 ? (
-            <p className="mt-4 text-slate-500">
+          {collaboration.applications.length === 0 ? (
+            <p className="mt-4 text-slate-500 dark:text-slate-400">
               No applications yet.
             </p>
           ) : (
@@ -325,21 +317,21 @@ function CollaborationDetails() {
                 (application) => (
                   <div
                     key={application._id}
-                    className="rounded-lg border border-slate-200 p-4"
+                    className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950"
                   >
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
 
                       <div>
 
-                        <h3 className="font-semibold text-slate-800">
+                        <h3 className="font-semibold text-slate-800 dark:text-white">
                           {
                             application.applicant
                               ?.name
                           }
                         </h3>
 
-                        <p className="text-sm text-slate-500">
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
                           {
                             application.applicant
                               ?.course
@@ -348,14 +340,14 @@ function CollaborationDetails() {
 
                       </div>
 
-                      <span className="text-sm capitalize text-slate-500">
+                      <span className="text-sm capitalize text-slate-500 dark:text-slate-400">
                         {application.status}
                       </span>
 
                     </div>
 
                     {application.message && (
-                      <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                      <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                         {application.message}
                       </p>
                     )}
@@ -373,7 +365,7 @@ function CollaborationDetails() {
                                 "accepted"
                               )
                             }
-                            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-700"
                           >
                             Accept
                           </button>
@@ -385,7 +377,7 @@ function CollaborationDetails() {
                                 "rejected"
                               )
                             }
-                            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
                           >
                             Reject
                           </button>

@@ -60,11 +60,11 @@ function Collaborations() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
             Collaborate
           </h1>
 
-          <p className="mt-1 text-slate-500">
+          <p className="mt-1 text-slate-500 dark:text-slate-400">
             Find teammates and build amazing projects together.
           </p>
         </div>
@@ -87,7 +87,7 @@ function Collaborations() {
             setSearch(event.target.value)
           }
           placeholder="Search projects..."
-          className="rounded-lg border border-slate-300 bg-white px-4 py-3 outline-none focus:border-indigo-500"
+          className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
         />
 
         <input
@@ -97,29 +97,29 @@ function Collaborations() {
             setSkill(event.target.value)
           }
           placeholder="Filter by skill..."
-          className="rounded-lg border border-slate-300 bg-white px-4 py-3 outline-none focus:border-indigo-500"
+          className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
         />
 
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 p-4 text-red-600">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-600 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
           {error}
         </div>
       )}
 
       {loading ? (
-        <div className="py-12 text-center text-slate-500">
+        <div className="py-12 text-center text-slate-500 dark:text-slate-400">
           Loading collaboration opportunities...
         </div>
       ) : collaborations.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center">
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-slate-700 dark:bg-slate-900">
 
-          <h3 className="font-semibold text-slate-700">
+          <h3 className="font-semibold text-slate-700 dark:text-white">
             No collaborations found
           </h3>
 
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
             Try another search or create a new project.
           </p>
 

@@ -46,6 +46,15 @@ export function AuthProvider({ children }) {
     loadUser();
   }, []);
 
+  useEffect(() => {
+    const darkMode = user?.preferences?.darkMode ?? false;
+
+    document.documentElement.classList.toggle(
+      "dark",
+      darkMode
+    );
+  }, [user]);
+
   const register = async (userData) => {
     const data =
       await authService.register(userData);

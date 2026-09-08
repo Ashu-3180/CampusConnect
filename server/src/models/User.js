@@ -69,6 +69,28 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    preferences: {
+      darkMode: {
+        type: Boolean,
+        default: false,
+      },
+
+      emailNotifications: {
+        type: Boolean,
+        default: true,
+      },
+
+      profileVisibility: {
+        type: String,
+        enum: [
+          "everyone",
+          "connections",
+          "only-me",
+        ],
+        default: "everyone",
+      },
+    },
+
     connections: [
       {
         type: mongoose.Schema.Types.ObjectId,
