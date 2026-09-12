@@ -113,16 +113,16 @@ function Toggle({ checked, onChange, label }) {
     <button
       type="button"
       onClick={onChange}
-      className={`relative h-7 w-12 shrink-0 rounded-full transition ${
+      aria-label={label}
+      aria-pressed={checked}
+      className={`relative h-6 w-11 shrink-0 rounded-full transition sm:h-7 sm:w-12 ${
         checked
           ? "bg-indigo-600"
           : "bg-slate-300 dark:bg-slate-700"
       }`}
-      aria-label={label}
-      aria-pressed={checked}
     >
       <span
-        className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition ${
+        className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition sm:h-5 sm:w-5 ${
           checked ? "left-6" : "left-1"
         }`}
       />
@@ -142,18 +142,18 @@ function SettingRow({
   const content = (
     <>
       <div
-        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-11 sm:w-11 ${
           danger
             ? "bg-red-500/10 text-red-500"
             : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
         }`}
       >
-        <Icon name={icon} size={20} />
+        <Icon name={icon} size={18} />
       </div>
 
       <div className="min-w-0 flex-1 text-left">
         <div
-          className={`font-semibold ${
+          className={`text-sm font-semibold sm:text-base ${
             danger
               ? "text-red-600 dark:text-red-400"
               : "text-slate-900 dark:text-white"
@@ -163,7 +163,7 @@ function SettingRow({
         </div>
 
         {description && (
-          <p className="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">
+          <p className="mt-0.5 text-xs leading-5 text-slate-500 sm:mt-1 sm:text-sm dark:text-slate-400">
             {description}
           </p>
         )}
@@ -171,7 +171,7 @@ function SettingRow({
 
       {children ||
         (value && (
-          <span className="shrink-0 text-sm font-medium text-slate-500 dark:text-slate-400">
+          <span className="max-w-[120px] shrink-0 truncate text-xs font-medium text-slate-500 sm:max-w-none sm:text-sm dark:text-slate-400">
             {value}
           </span>
         ))}
@@ -189,7 +189,7 @@ function SettingRow({
       <button
         type="button"
         onClick={onClick}
-        className="flex w-full items-center gap-4 rounded-xl px-3 py-4 text-left transition hover:bg-slate-50 active:bg-slate-100 dark:hover:bg-slate-800/80 dark:active:bg-slate-800"
+        className="flex w-full items-center gap-3 rounded-xl px-2.5 py-3 text-left transition hover:bg-slate-50 active:bg-slate-100 sm:gap-4 sm:px-3 sm:py-4 dark:hover:bg-slate-800/80 dark:active:bg-slate-800"
       >
         {content}
       </button>
@@ -197,7 +197,7 @@ function SettingRow({
   }
 
   return (
-    <div className="flex items-center gap-4 px-3 py-4">
+    <div className="flex items-center gap-3 px-2.5 py-3 sm:gap-4 sm:px-3 sm:py-4">
       {content}
     </div>
   );
@@ -210,26 +210,26 @@ function Section({
 }) {
   return (
     <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
-      <div className="border-b border-slate-100 px-5 py-5 dark:border-slate-800 sm:px-6">
-        <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+      <div className="border-b border-slate-100 px-4 py-4 dark:border-slate-800 sm:px-6 sm:py-5">
+        <h2 className="text-base font-bold text-slate-900 sm:text-lg dark:text-white">
           {title}
         </h2>
 
         {description && (
-          <p className="mt-1.5 text-sm leading-5 text-slate-500 dark:text-slate-400">
+          <p className="mt-1 text-xs leading-5 text-slate-500 sm:mt-1.5 sm:text-sm dark:text-slate-400">
             {description}
           </p>
         )}
       </div>
 
-      <div className="px-2 py-2 sm:px-3">
+      <div className="px-1.5 py-1.5 sm:px-3 sm:py-2">
         {children}
       </div>
     </section>
   );
 }
 
-function Setting() {
+function Settings() {
   const navigate = useNavigate();
 
   const {
@@ -576,13 +576,32 @@ function Setting() {
     }
   };
 
+  const closePasswordModal = () => {
+    if (passwordSaving) {
+      return;
+    }
+
+    setShowPasswordModal(false);
+    setPasswordError("");
+    setPasswordSuccess("");
+  };
+
+  const closeDeleteModal = () => {
+    if (deletingAccount) {
+      return;
+    }
+
+    setShowDeleteModal(false);
+    setDeleteError("");
+  };
+
   if (loading) {
     return (
-      <div className="mx-auto flex min-h-[60vh] w-full max-w-5xl items-center justify-center">
+      <div className="mx-auto flex min-h-[45vh] w-full max-w-5xl items-center justify-center px-4 sm:min-h-[60vh]">
         <div className="text-center">
           <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-indigo-600 dark:border-slate-700 dark:border-t-indigo-500" />
 
-          <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+          <p className="mt-3 text-xs text-slate-500 sm:mt-4 sm:text-sm dark:text-slate-400">
             Loading settings...
           </p>
         </div>
@@ -596,61 +615,56 @@ function Setting() {
   const email =
     user?.email || "Email not available";
 
-  const visibilityLabel = {
-    everyone: "Everyone",
-    connections: "Connections",
-    "only-me": "Only me",
-  }[profileVisibility];
-
   return (
     <div className="mx-auto w-full max-w-6xl pb-12">
 
       {/* Header */}
-      <div className="mb-8">
-        <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
+      <div className="mb-5 sm:mb-8">
+        <p className="text-xs font-semibold text-indigo-600 sm:text-sm dark:text-indigo-400">
           Account preferences
         </p>
 
-        <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+        <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
           Settings
         </h1>
 
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400 sm:text-base">
+        <p className="mt-1.5 max-w-2xl text-xs leading-5 text-slate-500 sm:mt-2 sm:text-base sm:leading-6 dark:text-slate-400">
           Manage your CampusConnect account, privacy,
           notifications, appearance and security.
         </p>
       </div>
 
-      {/* Feedback */}
+      {/* Error */}
       {error && (
-        <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-3 text-xs font-medium text-red-600 sm:mb-5 sm:px-4 sm:text-sm dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
           {error}
         </div>
       )}
 
+      {/* Saved */}
       {saved && (
-        <div className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700 dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-300">
+        <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-3 py-3 text-xs font-medium text-green-700 sm:mb-5 sm:px-4 sm:text-sm dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-300">
           Settings saved successfully.
         </div>
       )}
 
       {/* Profile summary */}
-      <section className="mb-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
+      <section className="mb-5 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-colors sm:mb-6 dark:border-slate-800 dark:bg-slate-900">
 
-        <div className="bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-6 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/30 sm:p-7">
+        <div className="bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-4 sm:p-7 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/30">
 
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
 
-            <div className="flex min-w-0 items-center gap-5">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-5">
 
               {user?.profileImage ? (
                 <img
                   src={user.profileImage}
                   alt={displayName}
-                  className="h-20 w-20 shrink-0 rounded-full object-cover ring-4 ring-white shadow-sm dark:ring-slate-800"
+                  className="h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-white shadow-sm sm:h-20 sm:w-20 dark:ring-slate-800"
                 />
               ) : (
-                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-2xl font-bold text-indigo-700 ring-4 ring-white shadow-sm dark:bg-indigo-500/20 dark:text-indigo-300 dark:ring-slate-800">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xl font-bold text-indigo-700 ring-4 ring-white shadow-sm sm:h-20 sm:w-20 sm:text-2xl dark:bg-indigo-500/20 dark:text-indigo-300 dark:ring-slate-800">
                   {displayName
                     .charAt(0)
                     .toUpperCase()}
@@ -658,15 +672,15 @@ function Setting() {
               )}
 
               <div className="min-w-0">
-                <h2 className="truncate text-xl font-bold text-slate-900 dark:text-white">
+                <h2 className="truncate text-base font-bold text-slate-900 sm:text-xl dark:text-white">
                   {displayName}
                 </h2>
 
-                <p className="mt-1 truncate text-sm text-slate-500 dark:text-slate-400">
+                <p className="mt-0.5 truncate text-xs text-slate-500 sm:mt-1 sm:text-sm dark:text-slate-400">
                   {email}
                 </p>
 
-                <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
+                <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-600 sm:mt-2 sm:text-xs dark:text-indigo-400">
                   CampusConnect account
                 </p>
               </div>
@@ -678,7 +692,7 @@ function Setting() {
               onClick={() =>
                 navigate("/app/profile")
               }
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 sm:w-auto dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             >
               <Icon name="edit" size={16} />
               Edit Profile
@@ -689,7 +703,7 @@ function Setting() {
       </section>
 
       {/* Settings sections */}
-      <div className="grid gap-5 xl:grid-cols-2">
+      <div className="grid gap-4 sm:gap-5 xl:grid-cols-2">
 
         {/* Account */}
         <Section
@@ -737,8 +751,8 @@ function Setting() {
                   event.target.value
                 )
               }
-              className="max-w-[150px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:ring-indigo-500/20"
               aria-label="Profile visibility"
+              className="max-w-[120px] rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:max-w-[150px] sm:px-3 sm:text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:ring-indigo-500/20"
             >
               <option value="everyone">
                 Everyone
@@ -776,7 +790,9 @@ function Setting() {
             <Toggle
               checked={darkMode}
               onChange={() =>
-                setDarkMode((value) => !value)
+                setDarkMode(
+                  (value) => !value
+                )
               }
               label="Toggle dark mode"
             />
@@ -863,14 +879,14 @@ function Setting() {
       </div>
 
       {/* Save preferences */}
-      <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/70 p-5 dark:border-indigo-900/40 dark:bg-indigo-950/20 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-5 flex flex-col gap-4 rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4 sm:mt-6 sm:flex-row sm:items-center sm:justify-between dark:border-indigo-900/40 dark:bg-indigo-950/20">
 
         <div>
-          <h3 className="font-semibold text-slate-900 dark:text-white">
+          <h3 className="text-sm font-semibold text-slate-900 sm:text-base dark:text-white">
             Save your preferences
           </h3>
 
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <p className="mt-1 text-xs leading-5 text-slate-500 sm:text-sm dark:text-slate-400">
             Your appearance, notification and privacy settings are stored with your account.
           </p>
         </div>
@@ -879,16 +895,17 @@ function Setting() {
           type="button"
           disabled={saving}
           onClick={handleSavePreferences}
-          className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 sm:w-auto disabled:cursor-not-allowed disabled:opacity-60"
         >
           {saving
             ? "Saving..."
             : "Save Preferences"}
         </button>
+
       </div>
 
       {/* Help & support */}
-      <div className="mt-5">
+      <div className="mt-4 sm:mt-5">
         <Section
           title="Help & support"
           description="Get help or tell us how CampusConnect can improve."
@@ -919,31 +936,30 @@ function Setting() {
       </div>
 
       {/* Danger zone */}
-      <section className="mt-5 overflow-hidden rounded-2xl border border-red-200 bg-white shadow-sm dark:border-red-900/50 dark:bg-slate-900">
+      <section className="mt-4 overflow-hidden rounded-2xl border border-red-200 bg-white shadow-sm sm:mt-5 dark:border-red-900/50 dark:bg-slate-900">
 
-        <div className="border-b border-red-100 px-5 py-5 dark:border-red-900/40 sm:px-6">
+        <div className="border-b border-red-100 px-4 py-4 sm:px-6 sm:py-5 dark:border-red-900/40">
 
-          <div className="flex items-start gap-4">
+          <div className="flex items-start gap-3 sm:gap-4">
 
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-red-500">
-              <Icon name="trash" size={20} />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-red-500 sm:h-11 sm:w-11">
+              <Icon name="trash" size={19} />
             </div>
 
             <div>
-              <h2 className="text-lg font-bold text-red-600 dark:text-red-400">
+              <h2 className="text-base font-bold text-red-600 sm:text-lg dark:text-red-400">
                 Account actions
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              <p className="mt-1 text-xs leading-5 text-slate-500 sm:text-sm dark:text-slate-400">
                 These actions can permanently affect your account.
               </p>
             </div>
 
           </div>
-
         </div>
 
-        <div className="p-2 sm:p-3">
+        <div className="p-1.5 sm:p-3">
           <SettingRow
             icon="trash"
             title="Delete Account"
@@ -963,33 +979,28 @@ function Setting() {
       {/* Password modal */}
       {showPasswordModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm"
-          onClick={() => {
-            if (!passwordSaving) {
-              setShowPasswordModal(false);
-              setPasswordError("");
-            }
-          }}
+          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/70 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6"
+          onClick={closePasswordModal}
         >
           <div
-            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900"
+            className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-3xl border border-slate-200 bg-white p-4 shadow-2xl sm:rounded-3xl sm:p-6 dark:border-slate-800 dark:bg-slate-900"
             onClick={(event) =>
               event.stopPropagation()
             }
           >
 
-            <div className="mb-6 flex items-start justify-between gap-4">
+            <div className="mb-4 flex items-start justify-between gap-3 sm:mb-6 sm:gap-4">
 
               <div>
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
-                  <Icon name="lock" size={22} />
+                <div className="mb-2.5 flex h-11 w-11 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 sm:mb-3 sm:h-12 sm:w-12 dark:bg-indigo-500/10 dark:text-indigo-400">
+                  <Icon name="lock" size={21} />
                 </div>
 
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                <h2 className="text-lg font-bold text-slate-900 sm:text-xl dark:text-white">
                   Change Password
                 </h2>
 
-                <p className="mt-1.5 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                <p className="mt-1 text-xs leading-5 text-slate-500 sm:mt-1.5 sm:text-sm sm:leading-6 dark:text-slate-400">
                   Enter your current password and choose a new one.
                 </p>
               </div>
@@ -997,12 +1008,9 @@ function Setting() {
               <button
                 type="button"
                 disabled={passwordSaving}
-                onClick={() => {
-                  setShowPasswordModal(false);
-                  setPasswordError("");
-                }}
-                className="flex h-9 w-9 items-center justify-center rounded-full text-2xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                onClick={closePasswordModal}
                 aria-label="Close"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-2xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               >
                 ×
               </button>
@@ -1010,20 +1018,20 @@ function Setting() {
             </div>
 
             {passwordError && (
-              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-3 text-xs font-medium text-red-600 sm:px-4 sm:text-sm dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
                 {passwordError}
               </div>
             )}
 
             {passwordSuccess && (
-              <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700 dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-300">
+              <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-3 py-3 text-xs font-medium text-green-700 sm:px-4 sm:text-sm dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-300">
                 {passwordSuccess}
               </div>
             )}
 
             <form
               onSubmit={handleChangePassword}
-              className="space-y-4"
+              className="space-y-3.5 sm:space-y-4"
             >
 
               <div>
@@ -1042,7 +1050,7 @@ function Setting() {
                   autoComplete="current-password"
                   placeholder="Enter current password"
                   disabled={passwordSaving}
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:px-4 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
                 />
               </div>
 
@@ -1062,7 +1070,7 @@ function Setting() {
                   autoComplete="new-password"
                   placeholder="Enter new password"
                   disabled={passwordSaving}
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:px-4 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
                 />
               </div>
 
@@ -1082,19 +1090,16 @@ function Setting() {
                   autoComplete="new-password"
                   placeholder="Confirm new password"
                   disabled={passwordSaving}
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:px-4 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
                 />
               </div>
 
-              <div className="flex gap-3 border-t border-slate-100 pt-5 dark:border-slate-800">
+              <div className="flex flex-col gap-2.5 border-t border-slate-100 pt-4 sm:flex-row sm:gap-3 sm:pt-5 dark:border-slate-800">
 
                 <button
                   type="button"
                   disabled={passwordSaving}
-                  onClick={() => {
-                    setShowPasswordModal(false);
-                    setPasswordError("");
-                  }}
+                  onClick={closePasswordModal}
                   className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
                   Cancel
@@ -1120,33 +1125,28 @@ function Setting() {
       {/* Delete modal */}
       {showDeleteModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 px-4 py-6 backdrop-blur-sm"
-          onClick={() => {
-            if (!deletingAccount) {
-              setShowDeleteModal(false);
-              setDeleteError("");
-            }
-          }}
+          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/75 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6"
+          onClick={closeDeleteModal}
         >
           <div
-            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl border border-red-200 bg-white p-6 shadow-2xl dark:border-red-900/60 dark:bg-slate-900"
+            className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-3xl border border-red-200 bg-white p-4 shadow-2xl sm:rounded-3xl sm:p-6 dark:border-red-900/60 dark:bg-slate-900"
             onClick={(event) =>
               event.stopPropagation()
             }
           >
 
-            <div className="mb-6 flex items-start justify-between gap-4">
+            <div className="mb-4 flex items-start justify-between gap-3 sm:mb-6 sm:gap-4">
 
               <div>
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-500">
+                <div className="mb-2.5 flex h-11 w-11 items-center justify-center rounded-full bg-red-500/10 text-red-500 sm:mb-3 sm:h-12 sm:w-12">
                   <Icon name="trash" size={21} />
                 </div>
 
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                <h2 className="text-lg font-bold text-slate-900 sm:text-xl dark:text-white">
                   Delete Account
                 </h2>
 
-                <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                <p className="mt-2 text-xs leading-5 text-slate-500 sm:text-sm sm:leading-6 dark:text-slate-400">
                   This action is permanent. Your account and associated CampusConnect data will be deleted.
                 </p>
               </div>
@@ -1154,19 +1154,16 @@ function Setting() {
               <button
                 type="button"
                 disabled={deletingAccount}
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setDeleteError("");
-                }}
-                className="flex h-9 w-9 items-center justify-center rounded-full text-2xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                onClick={closeDeleteModal}
                 aria-label="Close"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-2xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               >
                 ×
               </button>
 
             </div>
 
-            <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-950/30">
+            <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-3.5 sm:p-4 dark:border-red-900/50 dark:bg-red-950/30">
 
               <p className="text-sm font-semibold text-red-700 dark:text-red-300">
                 This cannot be undone.
@@ -1179,14 +1176,14 @@ function Setting() {
             </div>
 
             {deleteError && (
-              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-3 text-xs font-medium text-red-600 sm:px-4 sm:text-sm dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
                 {deleteError}
               </div>
             )}
 
             <form
               onSubmit={handleDeleteAccount}
-              className="space-y-4"
+              className="space-y-3.5 sm:space-y-4"
             >
 
               <div>
@@ -1205,7 +1202,7 @@ function Setting() {
                   autoComplete="current-password"
                   placeholder="Enter your current password"
                   disabled={deletingAccount}
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-red-500 focus:ring-2 focus:ring-red-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-red-500/10"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-red-500 focus:ring-2 focus:ring-red-100 sm:px-4 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-red-500/10"
                 />
               </div>
 
@@ -1225,19 +1222,16 @@ function Setting() {
                   placeholder="DELETE"
                   autoComplete="off"
                   disabled={deletingAccount}
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium uppercase text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-red-500 focus:ring-2 focus:ring-red-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-red-500/10"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm font-medium uppercase text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-red-500 focus:ring-2 focus:ring-red-100 sm:px-4 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-red-500/10"
                 />
               </div>
 
-              <div className="flex gap-3 border-t border-slate-100 pt-5 dark:border-slate-800">
+              <div className="flex flex-col gap-2.5 border-t border-slate-100 pt-4 sm:flex-row sm:gap-3 sm:pt-5 dark:border-slate-800">
 
                 <button
                   type="button"
                   disabled={deletingAccount}
-                  onClick={() => {
-                    setShowDeleteModal(false);
-                    setDeleteError("");
-                  }}
+                  onClick={closeDeleteModal}
                   className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
                   Cancel
@@ -1264,4 +1258,4 @@ function Setting() {
   );
 }
 
-export default Setting;
+export default Settings;
