@@ -287,16 +287,16 @@ function Events() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-6xl">
+    <div className="mx-auto w-full max-w-6xl space-y-5 sm:space-y-6">
 
       {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">
             Events
           </h1>
 
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400 sm:text-sm">
             Discover events, workshops and opportunities
             happening around your campus community.
           </p>
@@ -309,14 +309,14 @@ function Events() {
             setForm(emptyForm);
             setShowCreateModal(true);
           }}
-          className="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
+          className="inline-flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 sm:w-auto sm:px-5"
         >
           + Create Event
         </button>
       </div>
 
       {/* Event Tabs */}
-      <div className="mt-6 flex gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1 dark:border-slate-800 dark:bg-slate-900">
+      <div className="mt-5 flex gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1 dark:border-slate-800 dark:bg-slate-900 sm:mt-6">
         <button
           type="button"
           onClick={() => {
@@ -324,7 +324,7 @@ function Events() {
             setSearch("");
             setCategory("All");
           }}
-          className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
+          className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold transition sm:px-4 sm:py-2.5 sm:text-sm ${
             activeTab === "upcoming"
               ? "bg-white text-indigo-600 shadow-sm dark:bg-slate-800 dark:text-indigo-400"
               : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
@@ -340,7 +340,7 @@ function Events() {
             setSearch("");
             setCategory("All");
           }}
-          className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
+          className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold transition sm:px-4 sm:py-2.5 sm:text-sm ${
             activeTab === "my"
               ? "bg-white text-indigo-600 shadow-sm dark:bg-slate-800 dark:text-indigo-400"
               : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
@@ -351,8 +351,8 @@ function Events() {
       </div>
 
       {/* Filters */}
-      <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex flex-col gap-3 md:flex-row">
+      <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900 sm:mt-6 sm:p-4">
+        <div className="flex flex-col gap-2.5 sm:gap-3 md:flex-row">
           <div className="flex-1">
             <label
               htmlFor="event-search"
@@ -369,7 +369,7 @@ function Events() {
                 setSearch(event.target.value)
               }
               placeholder="Search events by title, description or location..."
-              className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition-colors sm:px-4 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
             />
           </div>
 
@@ -387,7 +387,7 @@ function Events() {
               onChange={(event) =>
                 setCategory(event.target.value)
               }
-              className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:focus:ring-indigo-500/20"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors sm:px-4 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:focus:ring-indigo-500/20"
             >
               {CATEGORIES.map((item) => (
                 <option key={item} value={item}>
@@ -401,7 +401,7 @@ function Events() {
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between">
+      <div className="mt-3 flex items-center justify-between gap-3 sm:mt-4">
         <p className="text-sm text-slate-500 dark:text-slate-400">
           {visibleEvents.length}{" "}
           {visibleEvents.length === 1
@@ -419,14 +419,14 @@ function Events() {
 
       {/* Error */}
       {error && (
-        <div className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
           {error}
         </div>
       )}
 
       {/* Loading */}
       {loading && (
-        <div className="flex min-h-[300px] items-center justify-center">
+        <div className="flex min-h-[220px] items-center justify-center sm:min-h-[300px]">
           <div className="text-center">
             <div className="mx-auto h-9 w-9 animate-spin rounded-full border-4 border-indigo-100 border-t-indigo-600 dark:border-indigo-950 dark:border-t-indigo-500" />
 
@@ -439,7 +439,7 @@ function Events() {
 
       {/* Empty */}
       {!loading && visibleEvents.length === 0 && (
-        <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center transition-colors dark:border-slate-700 dark:bg-slate-900">
+        <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-10 text-center sm:mt-8 sm:px-6 sm:py-14 transition-colors dark:border-slate-700 dark:bg-slate-900">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50 text-2xl dark:bg-indigo-500/10">
             📅
           </div>
@@ -463,7 +463,7 @@ function Events() {
               setForm(emptyForm);
               setShowCreateModal(true);
             }}
-            className="mt-5 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+            className="mt-4 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
           >
             Create an Event
           </button>
@@ -473,7 +473,7 @@ function Events() {
       {/* Event Grid */}
       {!loading &&
         visibleEvents.length > 0 && (
-          <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
             {visibleEvents.map((event) => {
               const organizer =
                 getOrganizer(event);
@@ -503,10 +503,10 @@ function Events() {
               return (
                 <article
                   key={event._id}
-                  className="flex min-h-[500px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:shadow-black/20"
+                  className="flex min-h-[460px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:shadow-black/20"
                 >
                   {/* Top section */}
-                  <div className="relative bg-gradient-to-br from-indigo-500 to-violet-600 px-5 py-6 text-white">
+                  <div className="relative bg-gradient-to-br from-indigo-500 to-violet-600 px-4 py-5 text-white sm:px-5 sm:py-6">
                     <div className="flex items-start justify-between gap-3">
                       <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur">
                         {event.category || "Other"}
@@ -527,25 +527,25 @@ function Events() {
                       </div>
                     </div>
 
-                    <h2 className="mt-5 line-clamp-2 text-xl font-bold">
+                    <h2 className="mt-4 line-clamp-2 text-lg font-bold leading-snug sm:mt-5 sm:text-xl">
                       {event.title}
                     </h2>
                   </div>
 
                   {/* Body */}
-                  <div className="flex flex-1 flex-col p-5">
-                    <p className="line-clamp-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  <div className="flex flex-1 flex-col p-4 sm:p-5">
+                    <p className="line-clamp-3 text-xs leading-5 text-slate-600 dark:text-slate-300 sm:text-sm sm:leading-6">
                       {event.description}
                     </p>
 
-                    <div className="mt-5 space-y-3 text-sm">
-                      <div className="flex items-start gap-3">
+                    <div className="mt-4 space-y-2.5 text-sm sm:mt-5 sm:space-y-3">
+                      <div className="flex items-start gap-2.5 sm:gap-3">
                         <span className="mt-0.5">
                           📅
                         </span>
 
                         <div>
-                          <p className="font-medium text-slate-800 dark:text-slate-100">
+                          <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
                             {formatDate(event.date)}
                           </p>
 
@@ -555,23 +555,23 @@ function Events() {
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-start gap-2.5 sm:gap-3">
                         <span className="mt-0.5">
                           📍
                         </span>
 
-                        <p className="text-slate-600 dark:text-slate-300">
+                        <p className="text-sm text-slate-600 dark:text-slate-300">
                           {event.location}
                         </p>
                       </div>
 
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-start gap-2.5 sm:gap-3">
                         <span className="mt-0.5">
                           👥
                         </span>
 
                         <div className="flex-1">
-                          <p className="text-slate-600 dark:text-slate-300">
+                          <p className="text-sm text-slate-600 dark:text-slate-300">
                             {attendeeCount} /{" "}
                             {event.maxAttendees || 0}{" "}
                             attendees
@@ -597,7 +597,7 @@ function Events() {
                     </div>
 
                     {/* Organizer */}
-                    <div className="mt-5 border-t border-slate-100 pt-4 dark:border-slate-800">
+                    <div className="mt-4 border-t border-slate-100 pt-3.5 dark:border-slate-800 sm:mt-5 sm:pt-4">
                       <p className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
                         Organized by
                       </p>
@@ -618,7 +618,7 @@ function Events() {
                         )}
 
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
+                          <p className="truncate text-xs font-semibold text-slate-800 dark:text-slate-100 sm:text-sm">
                             {organizer?.name ||
                               "Unknown organizer"}
                           </p>
@@ -632,7 +632,7 @@ function Events() {
                     </div>
 
                     {/* Actions */}
-                    <div className="mt-auto space-y-2 pt-5">
+                    <div className="mt-auto space-y-2 pt-4 sm:pt-5">
                       <button
                         type="button"
                         onClick={() =>
@@ -696,7 +696,7 @@ function Events() {
       {/* Create Event Modal */}
       {showCreateModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/70 p-0 backdrop-blur-sm sm:items-center sm:p-4"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) {
               if (!creating) {
@@ -705,16 +705,16 @@ function Events() {
             }
           }}
         >
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl bg-white shadow-2xl sm:rounded-2xl dark:border-slate-800 dark:bg-slate-900">
 
             {/* Modal header */}
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5 dark:border-slate-800">
+            <div className="flex items-start justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-800 sm:px-6 sm:py-5">
               <div>
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                   Create Event
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400 sm:text-sm">
                   Share an event with the CampusConnect
                   community.
                 </p>
@@ -737,7 +737,7 @@ function Events() {
             {/* Form */}
             <form
               onSubmit={handleCreateEvent}
-              className="space-y-5 px-6 py-6"
+              className="space-y-4 px-5 py-5 sm:space-y-5 sm:px-6 sm:py-6"
             >
               {formError && (
                 <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
@@ -766,7 +766,7 @@ function Events() {
                   placeholder="e.g. Campus Hackathon 2026"
                   maxLength={100}
                   required
-                  className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition-colors sm:px-4 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
                 />
               </div>
 
@@ -795,7 +795,7 @@ function Events() {
                 />
               </div>
 
-              <div className="grid gap-5 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-2 sm:gap-5">
                 <div>
                   <label
                     htmlFor="event-date"
@@ -815,7 +815,7 @@ function Events() {
                       )
                     }
                     required
-                    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-indigo-500/20"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition-colors sm:px-4 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-indigo-500/20"
                   />
                 </div>
 
@@ -840,12 +840,12 @@ function Events() {
                     placeholder="e.g. Main Auditorium"
                     maxLength={200}
                     required
-                    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition-colors sm:px-4 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
                   />
                 </div>
               </div>
 
-              <div className="grid gap-5 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-2 sm:gap-5">
                 <div>
                   <label
                     htmlFor="event-category-input"
@@ -863,7 +863,7 @@ function Events() {
                         event.target.value
                       )
                     }
-                    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:focus:ring-indigo-500/20"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors sm:px-4 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:focus:ring-indigo-500/20"
                   >
                     {CATEGORIES.filter(
                       (item) => item !== "All"
@@ -899,20 +899,20 @@ function Events() {
                       )
                     }
                     required
-                    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-indigo-500/20"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition-colors sm:px-4 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-indigo-500/20"
                   />
                 </div>
               </div>
 
               {/* Buttons */}
-              <div className="flex justify-end gap-3 border-t border-slate-100 pt-5 dark:border-slate-800">
+              <div className="flex flex-col-reverse gap-2.5 border-t border-slate-100 pt-4 dark:border-slate-800 sm:flex-row sm:justify-end sm:gap-3 sm:pt-5">
                 <button
                   type="button"
                   disabled={creating}
                   onClick={() =>
                     setShowCreateModal(false)
                   }
-                  className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                  className="w-full rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-semibold sm:w-auto text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
                   Cancel
                 </button>
@@ -920,7 +920,7 @@ function Events() {
                 <button
                   type="submit"
                   disabled={creating}
-                  className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {creating
                     ? "Creating..."
@@ -935,17 +935,17 @@ function Events() {
       {/* Event Details Modal */}
       {selectedEvent && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/70 p-0 backdrop-blur-sm sm:items-center sm:p-4"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) {
               setSelectedEvent(null);
             }
           }}
         >
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl bg-white shadow-2xl sm:rounded-2xl dark:border-slate-800 dark:bg-slate-900">
 
             {/* Modal header */}
-            <div className="relative bg-gradient-to-br from-indigo-500 to-violet-600 px-6 py-7 text-white">
+            <div className="relative bg-gradient-to-br from-indigo-500 to-violet-600 px-5 py-6 text-white sm:px-6 sm:py-7">
               <button
                 type="button"
                 onClick={() =>
@@ -970,10 +970,10 @@ function Events() {
             </div>
 
             {/* Modal content */}
-            <div className="p-6">
+            <div className="p-5 sm:p-6">
 
               {/* Event information */}
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
                 <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-950">
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
                     Date
@@ -983,7 +983,7 @@ function Events() {
                     {formatDate(selectedEvent.date)}
                   </p>
 
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400 sm:text-sm">
                     {formatTime(selectedEvent.date)}
                   </p>
                 </div>
@@ -1014,7 +1014,7 @@ function Events() {
                       0}
                   </p>
 
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400 sm:text-sm">
                     registered attendees
                   </p>
                 </div>
@@ -1086,13 +1086,13 @@ function Events() {
               </div>
 
               {/* Modal actions */}
-              <div className="mt-7 flex flex-col gap-3 border-t border-slate-100 pt-5 dark:border-slate-800 sm:flex-row sm:justify-end">
+              <div className="mt-6 flex flex-col gap-2.5 border-t border-slate-100 pt-4 dark:border-slate-800 sm:mt-7 sm:flex-row sm:justify-end sm:gap-3 sm:pt-5">
                 <button
                   type="button"
                   onClick={() =>
                     setSelectedEvent(null)
                   }
-                  className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                  className="w-full rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-semibold sm:w-auto text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
                   Close
                 </button>
@@ -1150,7 +1150,7 @@ function Events() {
 
                           setSelectedEvent(null);
                         }}
-                        className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                        className="w-full rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-semibold sm:w-auto text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
                       >
                         {busy
                           ? "Leaving..."
@@ -1170,7 +1170,7 @@ function Events() {
 
                         setSelectedEvent(null);
                       }}
-                      className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="w-full rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {busy
                         ? "Joining..."
