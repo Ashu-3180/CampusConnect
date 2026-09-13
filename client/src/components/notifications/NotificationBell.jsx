@@ -1,4 +1,8 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Link } from "react-router-dom";
 
 import notificationService from "../../services/notificationService";
@@ -12,13 +16,16 @@ function NotificationBell() {
 
   const [open, setOpen] = useState(false);
 
+  const notificationRef =
+    useRef(null);
+
   const loadNotifications = async () => {
     try {
       const data =
         await notificationService.getNotifications();
 
-      setNotifications(data.notifications);
-      setUnreadCount(data.unreadCount);
+      setNotifications(data.notifications || []);
+      setUnreadCount(data.unreadCount || 0);
     } catch (error) {
       console.error(
         "Failed to load notifications:",
@@ -35,8 +42,66 @@ function NotificationBell() {
       30000
     );
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
+
+  /*
+   * Close the notification panel when the user
+   * clicks anywhere outside the notification area.
+   */
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(
+          event.target
+        )
+      ) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener(
+      "mousedown",
+      handleOutsideClick
+    );
+
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handleOutsideClick
+      );
+    };
+  }, []);
+
+  /*
+   * Also allow Escape to close the panel,
+   * matching common app behavior.
+   */
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (
+        event.key === "Escape" &&
+        open
+      ) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener(
+      "keydown",
+      handleEscape
+    );
+
+    return () => {
+      document.removeEventListener(
+        "keydown",
+        handleEscape
+      );
+    };
+  }, [open]);
 
   const handleMarkAsRead = async (
     notification
@@ -62,7 +127,10 @@ function NotificationBell() {
           Math.max(0, count - 1)
         );
       } catch (error) {
-        console.error(error);
+        console.error(
+          "Failed to mark notification as read:",
+          error
+        );
       }
     }
   };
@@ -81,17 +149,27 @@ function NotificationBell() {
 
         setUnreadCount(0);
       } catch (error) {
-        console.error(error);
+        console.error(
+          "Failed to mark all notifications as read:",
+          error
+        );
       }
     };
 
   return (
-    <div className="relative">
-
+    <div
+      ref={notificationRef}
+      className="relative"
+    >
       <button
-        onClick={() => setOpen(!open)}
-        className="relative rounded-lg p-2 text-slate-600 hover:bg-slate-100"
+        type="button"
+        onClick={() =>
+          setOpen((current) => !current)
+        }
+        className="relative rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
         aria-label="Notifications"
+        aria-expanded={open}
+        aria-haspopup="true"
       >
         🔔
 
@@ -105,20 +183,22 @@ function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+        <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
 
-          <div className="flex items-center justify-between border-b border-slate-100 p-4">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-slate-100 p-4 dark:border-slate-800">
 
-            <h3 className="font-semibold text-slate-800">
+            <h3 className="font-semibold text-slate-800 dark:text-white">
               Notifications
             </h3>
 
             {unreadCount > 0 && (
               <button
+                type="button"
                 onClick={
                   handleMarkAllAsRead
                 }
-                className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
               >
                 Mark all as read
               </button>
@@ -126,10 +206,11 @@ function NotificationBell() {
 
           </div>
 
+          {/* Notification list */}
           <div className="max-h-96 overflow-y-auto">
 
             {notifications.length === 0 ? (
-              <div className="p-6 text-center text-sm text-slate-500">
+              <div className="p-6 text-center text-sm text-slate-500 dark:text-slate-400">
                 No notifications yet.
               </div>
             ) : (
@@ -137,28 +218,32 @@ function NotificationBell() {
                 (notification) => (
                   <Link
                     key={notification._id}
-                    to={notification.link || "#"}
+                    to={
+                      notification.link ||
+                      "#"
+                    }
                     onClick={() =>
                       handleMarkAsRead(
                         notification
                       )
                     }
-                    className={`block border-b border-slate-100 p-4 transition hover:bg-slate-50 ${
+                    className={`block border-b border-slate-100 p-4 transition hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800 ${
                       notification.isRead
-                        ? "bg-white"
-                        : "bg-indigo-50"
+                        ? "bg-white dark:bg-slate-900"
+                        : "bg-indigo-50 dark:bg-indigo-950/30"
                     }`}
                   >
-
                     <div className="flex gap-3">
 
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100">
+                      {/* Sender avatar */}
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
 
                         {notification.sender
                           ?.profileImage ? (
                           <img
                             src={
-                              notification.sender
+                              notification
+                                .sender
                                 .profileImage
                             }
                             alt=""
@@ -172,20 +257,22 @@ function NotificationBell() {
 
                       </div>
 
-                      <div>
+                      {/* Content */}
+                      <div className="min-w-0">
 
-                        <p className="text-sm text-slate-700">
+                        <p className="text-sm text-slate-700 dark:text-slate-200">
                           <span className="font-semibold">
                             {
-                              notification.sender
+                              notification
+                                .sender
                                 ?.name ||
-                                "Someone"
+                              "Someone"
                             }
                           </span>{" "}
                           {notification.message}
                         </p>
 
-                        <p className="mt-1 text-xs text-slate-400">
+                        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
                           {new Date(
                             notification.createdAt
                           ).toLocaleString()}
@@ -194,7 +281,6 @@ function NotificationBell() {
                       </div>
 
                     </div>
-
                   </Link>
                 )
               )
@@ -204,7 +290,6 @@ function NotificationBell() {
 
         </div>
       )}
-
     </div>
   );
 }

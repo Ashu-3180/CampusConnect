@@ -3,333 +3,81 @@ import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
 import userService from "../services/userService";
+import PasswordSecurityPanel from "../components/settings/PasswordSecurityPanel";
+import DeleteAccountPanel from "../components/settings/DeleteAccountPanel";
 
-function Icon({ name, size = 22 }) {
-  const common = {
-    width: size,
-    height: size,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 1.8,
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-    "aria-hidden": true,
-  };
-
-  const paths = {
-    user: (
-      <>
-        <circle cx="12" cy="8" r="3.5" />
-        <path d="M5 20c.8-3.2 3.1-5 7-5s6.2 1.8 7 5" />
-      </>
-    ),
-
-    shield: (
-      <>
-        <path d="M12 3l7 3v5c0 4.6-2.9 8-7 10-4.1-2-7-5.4-7-10V6l7-3z" />
-        <path d="m9.5 12 1.7 1.7 3.5-3.5" />
-      </>
-    ),
-
-    lock: (
-      <>
-        <rect x="5" y="10" width="14" height="10" rx="2" />
-        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-      </>
-    ),
-
-    bell: (
-      <>
-        <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 8h18c0-1-3-1-3-8" />
-        <path d="M10 21h4" />
-      </>
-    ),
-
-    moon: (
-      <path d="M20 15.5A8.5 8.5 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5z" />
-    ),
-
-    globe: (
-      <>
-        <circle cx="12" cy="12" r="9" />
-        <path d="M3 12h18M12 3c2.2 2.4 3.3 5.4 3.3 9s-1.1 6.6-3.3 9c-2.2-2.4-3.3-5.4-3.3-9S9.8 5.4 12 3z" />
-      </>
-    ),
-
-    users: (
-      <>
-        <circle cx="9" cy="8" r="3" />
-        <path d="M3 20c.6-3.1 2.5-4.7 6-4.7s5.4 1.6 6 4.7" />
-        <path d="M16 5.5a3 3 0 0 1 0 5.7M18 15.2c1.7.7 2.7 2 3 3.8" />
-      </>
-    ),
-
-    eye: (
-      <>
-        <path d="M2.5 12s3.4-5.5 9.5-5.5 9.5 5.5 9.5 5.5-3.4 5.5-9.5 5.5S2.5 12 2.5 12z" />
-        <circle cx="12" cy="12" r="2.5" />
-      </>
-    ),
-
-    key: (
-      <>
-        <circle cx="8" cy="15" r="3.5" />
-        <path d="m10.5 12.5 8-8M15 7l2 2M17 5l2 2" />
-      </>
-    ),
-
-    logOut: (
-      <>
-        <path d="M10 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5" />
-        <path d="m14 8 4 4-4 4M8 12h10" />
-      </>
-    ),
-
-    trash: (
-      <path d="M4 7h16M10 11v5M14 11v5M6 7l1 13h10l1-13M9 7V4h6v3" />
-    ),
-
-    info: (
-      <>
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 10v6M12 7h.01" />
-      </>
-    ),
-
-    edit: (
-      <>
-        <path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17l-1 3z" />
-        <path d="m14 7 3 3" />
-      </>
-    ),
-  };
-
-  return <svg {...common}>{paths[name] || paths.info}</svg>;
-}
-
-function Toggle({ checked, onChange, label }) {
-  return (
-    <button
-      type="button"
-      onClick={onChange}
-      aria-label={label}
-      aria-pressed={checked}
-      className={`relative h-6 w-11 shrink-0 rounded-full transition sm:h-7 sm:w-12 ${
-        checked
-          ? "bg-indigo-600"
-          : "bg-slate-300 dark:bg-slate-700"
-      }`}
-    >
-      <span
-        className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition sm:h-5 sm:w-5 ${
-          checked ? "left-6" : "left-1"
-        }`}
-      />
-    </button>
-  );
-}
-
-function SettingRow({
-  icon,
-  title,
-  description,
-  value,
-  onClick,
-  danger = false,
-  children,
-}) {
-  const content = (
-    <>
-      <div
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-11 sm:w-11 ${
-          danger
-            ? "bg-red-500/10 text-red-500"
-            : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-        }`}
-      >
-        <Icon name={icon} size={18} />
-      </div>
-
-      <div className="min-w-0 flex-1 text-left">
-        <div
-          className={`text-sm font-semibold sm:text-base ${
-            danger
-              ? "text-red-600 dark:text-red-400"
-              : "text-slate-900 dark:text-white"
-          }`}
-        >
-          {title}
-        </div>
-
-        {description && (
-          <p className="mt-0.5 text-xs leading-5 text-slate-500 sm:mt-1 sm:text-sm dark:text-slate-400">
-            {description}
-          </p>
-        )}
-      </div>
-
-      {children ||
-        (value && (
-          <span className="max-w-[120px] shrink-0 truncate text-xs font-medium text-slate-500 sm:max-w-none sm:text-sm dark:text-slate-400">
-            {value}
-          </span>
-        ))}
-
-      {onClick && !children && (
-        <span className="shrink-0 text-xl leading-none text-slate-400 dark:text-slate-500">
-          ›
-        </span>
-      )}
-    </>
-  );
-
-  if (onClick) {
-    return (
-      <button
-        type="button"
-        onClick={onClick}
-        className="flex w-full items-center gap-3 rounded-xl px-2.5 py-3 text-left transition hover:bg-slate-50 active:bg-slate-100 sm:gap-4 sm:px-3 sm:py-4 dark:hover:bg-slate-800/80 dark:active:bg-slate-800"
-      >
-        {content}
-      </button>
-    );
-  }
-
-  return (
-    <div className="flex items-center gap-3 px-2.5 py-3 sm:gap-4 sm:px-3 sm:py-4">
-      {content}
-    </div>
-  );
-}
-
-function Section({
-  title,
-  description,
-  children,
-}) {
-  return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
-      <div className="border-b border-slate-100 px-4 py-4 dark:border-slate-800 sm:px-6 sm:py-5">
-        <h2 className="text-base font-bold text-slate-900 sm:text-lg dark:text-white">
-          {title}
-        </h2>
-
-        {description && (
-          <p className="mt-1 text-xs leading-5 text-slate-500 sm:mt-1.5 sm:text-sm dark:text-slate-400">
-            {description}
-          </p>
-        )}
-      </div>
-
-      <div className="px-1.5 py-1.5 sm:px-3 sm:py-2">
-        {children}
-      </div>
-    </section>
-  );
-}
+import {
+  SettingsIcon as Icon,
+  SettingsToggle as Toggle,
+  SavingIndicator,
+  SettingRow,
+  SettingsSection as Section,
+} from "../components/settings/SettingsUI";
 
 function Settings() {
   const navigate = useNavigate();
+  const { user, logout, updateUser } = useAuth();
 
-  const {
-    user,
-    logout,
-    updateUser,
-  } = useAuth();
-
-  const [darkMode, setDarkMode] =
-    useState(false);
-
+  const [darkMode, setDarkMode] = useState(false);
   const [emailNotifications, setEmailNotifications] =
     useState(true);
-
   const [profileVisibility, setProfileVisibility] =
     useState("everyone");
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const [savingPreference, setSavingPreference] =
+    useState("");
+  const [savedPreference, setSavedPreference] =
+    useState("");
 
-  const [saving, setSaving] =
+  const [showPasswordSecurity, setShowPasswordSecurity] =
     useState(false);
-
-  const [error, setError] =
-    useState("");
-
-  const [saved, setSaved] =
-    useState(false);
-
-  const [showPasswordModal, setShowPasswordModal] =
-    useState(false);
-
-  const [currentPassword, setCurrentPassword] =
-    useState("");
-
-  const [newPassword, setNewPassword] =
-    useState("");
-
-  const [confirmPassword, setConfirmPassword] =
-    useState("");
-
-  const [passwordSaving, setPasswordSaving] =
-    useState(false);
-
-  const [passwordError, setPasswordError] =
-    useState("");
-
-  const [passwordSuccess, setPasswordSuccess] =
-    useState("");
-
-  const [showDeleteModal, setShowDeleteModal] =
-    useState(false);
-
-  const [deletePassword, setDeletePassword] =
-    useState("");
-
-  const [deleteConfirmation, setDeleteConfirmation] =
-    useState("");
-
-  const [deleteError, setDeleteError] =
-    useState("");
-
-  const [deletingAccount, setDeletingAccount] =
+  const [showDeleteAccount, setShowDeleteAccount] =
     useState(false);
 
   useEffect(() => {
+    let mounted = true;
+
     const loadPreferences = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const data =
-          await userService.getMyPreferences();
+        const data = await userService.getMyPreferences();
+        const preferences = data.preferences || {};
 
-        const preferences =
-          data.preferences || {};
+        if (!mounted) {
+          return;
+        }
 
-        setDarkMode(
-          preferences.darkMode ?? false
-        );
-
+        setDarkMode(preferences.darkMode ?? false);
         setEmailNotifications(
           preferences.emailNotifications ?? true
         );
-
         setProfileVisibility(
-          preferences.profileVisibility ||
-            "everyone"
+          preferences.profileVisibility || "everyone"
         );
-      } catch (error) {
-        setError(
-          error.message ||
-            "Failed to load preferences"
-        );
+      } catch (requestError) {
+        if (mounted) {
+          setError(
+            requestError.message ||
+              "Failed to load preferences"
+          );
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
     loadPreferences();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -339,260 +87,143 @@ function Settings() {
     );
   }, [darkMode]);
 
-  const handleSavePreferences = async () => {
+  useEffect(() => {
+    if (!savedPreference) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      setSavedPreference("");
+    }, 2200);
+
+    return () => window.clearTimeout(timer);
+  }, [savedPreference]);
+
+  useEffect(() => {
+    if (!feedback) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      setFeedback("");
+    }, 3500);
+
+    return () => window.clearTimeout(timer);
+  }, [feedback]);
+
+  const persistPreference = async (key, nextValue, previousValue) => {
+    if (savingPreference) {
+      return;
+    }
+
+    setSavingPreference(key);
+    setSavedPreference("");
+    setError("");
+    setFeedback("");
+
     try {
-      setSaving(true);
-      setError("");
-      setSaved(false);
+      const data = await userService.updateMyPreferences({
+        [key]: nextValue,
+      });
 
-      const data =
-        await userService.updateMyPreferences({
-          darkMode,
-          emailNotifications,
-          profileVisibility,
-        });
+      const preferences = data.preferences || {};
+      const finalValue = preferences[key] ?? nextValue;
 
-      const preferences =
-        data.preferences || {};
+      if (key === "darkMode") {
+        setDarkMode(finalValue);
+      }
 
-      const finalDarkMode =
-        preferences.darkMode ?? darkMode;
+      if (key === "emailNotifications") {
+        setEmailNotifications(finalValue);
+      }
 
-      const finalEmailNotifications =
-        preferences.emailNotifications ??
-        emailNotifications;
-
-      const finalProfileVisibility =
-        preferences.profileVisibility ||
-        profileVisibility;
-
-      setDarkMode(finalDarkMode);
-      setEmailNotifications(
-        finalEmailNotifications
-      );
-      setProfileVisibility(
-        finalProfileVisibility
-      );
+      if (key === "profileVisibility") {
+        setProfileVisibility(finalValue);
+      }
 
       if (user) {
         updateUser({
           ...user,
           preferences: {
             ...user.preferences,
-            darkMode: finalDarkMode,
-            emailNotifications:
-              finalEmailNotifications,
-            profileVisibility:
-              finalProfileVisibility,
+            [key]: finalValue,
           },
         });
       }
 
-      setSaved(true);
+      setSavedPreference(key);
+      setFeedback("Preference updated successfully.");
+    } catch (requestError) {
+      if (key === "darkMode") {
+        setDarkMode(previousValue);
+      }
 
-      setTimeout(() => {
-        setSaved(false);
-      }, 3000);
-    } catch (error) {
+      if (key === "emailNotifications") {
+        setEmailNotifications(previousValue);
+      }
+
+      if (key === "profileVisibility") {
+        setProfileVisibility(previousValue);
+      }
+
       setError(
-        error.message ||
-          "Failed to save preferences"
+        requestError.message ||
+          "Failed to update preference."
       );
     } finally {
-      setSaving(false);
+      setSavingPreference("");
     }
   };
 
-  const handleChangePassword = async (
-    event
-  ) => {
-    event.preventDefault();
-
-    setPasswordError("");
-    setPasswordSuccess("");
-
-    if (
-      !currentPassword ||
-      !newPassword ||
-      !confirmPassword
-    ) {
-      setPasswordError(
-        "Please fill in all password fields."
-      );
+  const handleDarkModeChange = () => {
+    if (savingPreference) {
       return;
     }
 
-    if (newPassword.length < 6) {
-      setPasswordError(
-        "New password must be at least 6 characters."
-      );
-      return;
-    }
+    const previousValue = darkMode;
+    const nextValue = !darkMode;
 
-    if (newPassword !== confirmPassword) {
-      setPasswordError(
-        "New passwords do not match."
-      );
-      return;
-    }
+    setDarkMode(nextValue);
 
-    if (currentPassword === newPassword) {
-      setPasswordError(
-        "New password must be different from your current password."
-      );
-      return;
-    }
-
-    try {
-      setPasswordSaving(true);
-
-      const token =
-        localStorage.getItem("token");
-
-      if (!token) {
-        throw new Error(
-          "You must be logged in to change your password."
-        );
-      }
-
-      const response = await fetch(
-        "http://localhost:5000/api/auth/change-password",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            currentPassword,
-            newPassword,
-          }),
-        }
-      );
-
-      const data =
-        await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message ||
-            "Failed to change password."
-        );
-      }
-
-      setPasswordSuccess(
-        "Password changed successfully."
-      );
-
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-
-      setTimeout(() => {
-        setShowPasswordModal(false);
-        setPasswordSuccess("");
-      }, 1500);
-    } catch (error) {
-      setPasswordError(
-        error.message ||
-          "Failed to change password."
-      );
-    } finally {
-      setPasswordSaving(false);
-    }
+    persistPreference(
+      "darkMode",
+      nextValue,
+      previousValue
+    );
   };
 
-  const handleDeleteAccount = async (
-    event
-  ) => {
-    event.preventDefault();
-
-    setDeleteError("");
-
-    if (!deletePassword) {
-      setDeleteError(
-        "Please enter your current password."
-      );
+  const handleEmailNotificationsChange = () => {
+    if (savingPreference) {
       return;
     }
 
-    if (deleteConfirmation !== "DELETE") {
-      setDeleteError(
-        'Please type "DELETE" exactly to confirm.'
-      );
-      return;
-    }
+    const previousValue = emailNotifications;
+    const nextValue = !emailNotifications;
 
-    try {
-      setDeletingAccount(true);
+    setEmailNotifications(nextValue);
 
-      const token =
-        localStorage.getItem("token");
-
-      if (!token) {
-        throw new Error(
-          "You must be logged in to delete your account."
-        );
-      }
-
-      const response = await fetch(
-        "http://localhost:5000/api/auth/delete-account",
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            currentPassword: deletePassword,
-            confirmation:
-              deleteConfirmation,
-          }),
-        }
-      );
-
-      const data =
-        await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message ||
-            "Failed to delete account."
-        );
-      }
-
-      setShowDeleteModal(false);
-      setDeletePassword("");
-      setDeleteConfirmation("");
-
-      logout();
-    } catch (error) {
-      setDeleteError(
-        error.message ||
-          "Failed to delete account."
-      );
-    } finally {
-      setDeletingAccount(false);
-    }
+    persistPreference(
+      "emailNotifications",
+      nextValue,
+      previousValue
+    );
   };
 
-  const closePasswordModal = () => {
-    if (passwordSaving) {
+  const handleProfileVisibilityChange = (event) => {
+    if (savingPreference) {
       return;
     }
 
-    setShowPasswordModal(false);
-    setPasswordError("");
-    setPasswordSuccess("");
-  };
+    const previousValue = profileVisibility;
+    const nextValue = event.target.value;
 
-  const closeDeleteModal = () => {
-    if (deletingAccount) {
-      return;
-    }
+    setProfileVisibility(nextValue);
 
-    setShowDeleteModal(false);
-    setDeleteError("");
+    persistPreference(
+      "profileVisibility",
+      nextValue,
+      previousValue
+    );
   };
 
   if (loading) {
@@ -609,15 +240,11 @@ function Settings() {
     );
   }
 
-  const displayName =
-    user?.name || "CampusConnect User";
-
-  const email =
-    user?.email || "Email not available";
+  const displayName = user?.name || "CampusConnect User";
+  const email = user?.email || "Email not available";
 
   return (
     <div className="mx-auto w-full max-w-6xl pb-12">
-
       {/* Header */}
       <div className="mb-5 sm:mb-8">
         <p className="text-xs font-semibold text-indigo-600 sm:text-sm dark:text-indigo-400">
@@ -634,29 +261,26 @@ function Settings() {
         </p>
       </div>
 
-      {/* Error */}
+      {/* Global error */}
       {error && (
         <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-3 text-xs font-medium text-red-600 sm:mb-5 sm:px-4 sm:text-sm dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
           {error}
         </div>
       )}
 
-      {/* Saved */}
-      {saved && (
-        <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-3 py-3 text-xs font-medium text-green-700 sm:mb-5 sm:px-4 sm:text-sm dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-300">
-          Settings saved successfully.
+      {/* Autosave feedback */}
+      {feedback && (
+        <div className="mb-4 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-3 py-3 text-xs font-medium text-green-700 sm:mb-5 sm:px-4 sm:text-sm dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-300">
+          <Icon name="check" size={15} />
+          {feedback}
         </div>
       )}
 
       {/* Profile summary */}
       <section className="mb-5 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-colors sm:mb-6 dark:border-slate-800 dark:bg-slate-900">
-
         <div className="bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-4 sm:p-7 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/30">
-
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-
             <div className="flex min-w-0 items-center gap-3 sm:gap-5">
-
               {user?.profileImage ? (
                 <img
                   src={user.profileImage}
@@ -665,9 +289,7 @@ function Settings() {
                 />
               ) : (
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xl font-bold text-indigo-700 ring-4 ring-white shadow-sm sm:h-20 sm:w-20 sm:text-2xl dark:bg-indigo-500/20 dark:text-indigo-300 dark:ring-slate-800">
-                  {displayName
-                    .charAt(0)
-                    .toUpperCase()}
+                  {displayName.charAt(0).toUpperCase()}
                 </div>
               )}
 
@@ -684,27 +306,22 @@ function Settings() {
                   CampusConnect account
                 </p>
               </div>
-
             </div>
 
             <button
               type="button"
-              onClick={() =>
-                navigate("/app/profile")
-              }
+              onClick={() => navigate("/app/profile")}
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 sm:w-auto dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             >
               <Icon name="edit" size={16} />
               Edit Profile
             </button>
-
           </div>
         </div>
       </section>
 
       {/* Settings sections */}
       <div className="grid gap-4 sm:gap-5 xl:grid-cols-2">
-
         {/* Account */}
         <Section
           title="Account"
@@ -715,9 +332,7 @@ function Settings() {
             title="Personal Information"
             description="Your name and account email"
             value={displayName}
-            onClick={() =>
-              navigate("/app/profile")
-            }
+            onClick={() => navigate("/app/profile")}
           />
 
           <div className="mx-3 border-t border-slate-100 dark:border-slate-800" />
@@ -726,11 +341,7 @@ function Settings() {
             icon="key"
             title="Password & Security"
             description="Keep your account protected"
-            onClick={() => {
-              setShowPasswordModal(true);
-              setPasswordError("");
-              setPasswordSuccess("");
-            }}
+            onClick={() => setShowPasswordSecurity(true)}
           />
         </Section>
 
@@ -744,28 +355,24 @@ function Settings() {
             title="Profile Visibility"
             description="Control who can view your profile"
           >
-            <select
-              value={profileVisibility}
-              onChange={(event) =>
-                setProfileVisibility(
-                  event.target.value
-                )
-              }
-              aria-label="Profile visibility"
-              className="max-w-[120px] rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:max-w-[150px] sm:px-3 sm:text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:ring-indigo-500/20"
-            >
-              <option value="everyone">
-                Everyone
-              </option>
+            <div className="flex shrink-0 items-center gap-2">
+              <SavingIndicator
+                active={savingPreference === "profileVisibility"}
+                saved={savedPreference === "profileVisibility"}
+              />
 
-              <option value="connections">
-                Connections
-              </option>
-
-              <option value="only-me">
-                Only me
-              </option>
-            </select>
+              <select
+                value={profileVisibility}
+                onChange={handleProfileVisibilityChange}
+                disabled={Boolean(savingPreference)}
+                aria-label="Profile visibility"
+                className="max-w-[120px] rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 sm:max-w-[150px] sm:px-3 sm:text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:ring-indigo-500/20"
+              >
+                <option value="everyone">Everyone</option>
+                <option value="connections">Connections</option>
+                <option value="only-me">Only me</option>
+              </select>
+            </div>
           </SettingRow>
 
           <div className="mx-3 border-t border-slate-100 dark:border-slate-800" />
@@ -787,15 +394,19 @@ function Settings() {
             title="Dark Mode"
             description="Use a darker appearance throughout CampusConnect"
           >
-            <Toggle
-              checked={darkMode}
-              onChange={() =>
-                setDarkMode(
-                  (value) => !value
-                )
-              }
-              label="Toggle dark mode"
-            />
+            <div className="flex shrink-0 items-center gap-2">
+              <SavingIndicator
+                active={savingPreference === "darkMode"}
+                saved={savedPreference === "darkMode"}
+              />
+
+              <Toggle
+                checked={darkMode}
+                onChange={handleDarkModeChange}
+                disabled={Boolean(savingPreference)}
+                label="Toggle dark mode"
+              />
+            </div>
           </SettingRow>
 
           <div className="mx-3 border-t border-slate-100 dark:border-slate-800" />
@@ -805,15 +416,23 @@ function Settings() {
             title="Email Notifications"
             description="Receive updates and important account notifications"
           >
-            <Toggle
-              checked={emailNotifications}
-              onChange={() =>
-                setEmailNotifications(
-                  (value) => !value
-                )
-              }
-              label="Toggle email notifications"
-            />
+            <div className="flex shrink-0 items-center gap-2">
+              <SavingIndicator
+                active={
+                  savingPreference === "emailNotifications"
+                }
+                saved={
+                  savedPreference === "emailNotifications"
+                }
+              />
+
+              <Toggle
+                checked={emailNotifications}
+                onChange={handleEmailNotificationsChange}
+                disabled={Boolean(savingPreference)}
+                label="Toggle email notifications"
+              />
+            </div>
           </SettingRow>
 
           <div className="mx-3 border-t border-slate-100 dark:border-slate-800" />
@@ -846,23 +465,6 @@ function Settings() {
           />
         </Section>
 
-        {/* Security */}
-        <Section
-          title="Security"
-          description="Keep your CampusConnect account secure."
-        >
-          <SettingRow
-            icon="lock"
-            title="Password"
-            description="Change your password to keep your account secure"
-            onClick={() => {
-              setShowPasswordModal(true);
-              setPasswordError("");
-              setPasswordSuccess("");
-            }}
-          />
-        </Section>
-
         {/* Session */}
         <Section
           title="Session"
@@ -875,33 +477,6 @@ function Settings() {
             onClick={logout}
           />
         </Section>
-
-      </div>
-
-      {/* Save preferences */}
-      <div className="mt-5 flex flex-col gap-4 rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4 sm:mt-6 sm:flex-row sm:items-center sm:justify-between dark:border-indigo-900/40 dark:bg-indigo-950/20">
-
-        <div>
-          <h3 className="text-sm font-semibold text-slate-900 sm:text-base dark:text-white">
-            Save your preferences
-          </h3>
-
-          <p className="mt-1 text-xs leading-5 text-slate-500 sm:text-sm dark:text-slate-400">
-            Your appearance, notification and privacy settings are stored with your account.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          disabled={saving}
-          onClick={handleSavePreferences}
-          className="w-full rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 sm:w-auto disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {saving
-            ? "Saving..."
-            : "Save Preferences"}
-        </button>
-
       </div>
 
       {/* Help & support */}
@@ -937,11 +512,8 @@ function Settings() {
 
       {/* Danger zone */}
       <section className="mt-4 overflow-hidden rounded-2xl border border-red-200 bg-white shadow-sm sm:mt-5 dark:border-red-900/50 dark:bg-slate-900">
-
         <div className="border-b border-red-100 px-4 py-4 sm:px-6 sm:py-5 dark:border-red-900/40">
-
           <div className="flex items-start gap-3 sm:gap-4">
-
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-red-500 sm:h-11 sm:w-11">
               <Icon name="trash" size={19} />
             </div>
@@ -955,7 +527,6 @@ function Settings() {
                 These actions can permanently affect your account.
               </p>
             </div>
-
           </div>
         </div>
 
@@ -965,295 +536,21 @@ function Settings() {
             title="Delete Account"
             description="Permanently delete your CampusConnect account"
             danger
-            onClick={() => {
-              setShowDeleteModal(true);
-              setDeleteError("");
-              setDeletePassword("");
-              setDeleteConfirmation("");
-            }}
+            onClick={() => setShowDeleteAccount(true)}
           />
         </div>
-
       </section>
 
-      {/* Password modal */}
-      {showPasswordModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/70 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6"
-          onClick={closePasswordModal}
-        >
-          <div
-            className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-3xl border border-slate-200 bg-white p-4 shadow-2xl sm:rounded-3xl sm:p-6 dark:border-slate-800 dark:bg-slate-900"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
-          >
+      <PasswordSecurityPanel
+        open={showPasswordSecurity}
+        onClose={() => setShowPasswordSecurity(false)}
+      />
 
-            <div className="mb-4 flex items-start justify-between gap-3 sm:mb-6 sm:gap-4">
-
-              <div>
-                <div className="mb-2.5 flex h-11 w-11 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 sm:mb-3 sm:h-12 sm:w-12 dark:bg-indigo-500/10 dark:text-indigo-400">
-                  <Icon name="lock" size={21} />
-                </div>
-
-                <h2 className="text-lg font-bold text-slate-900 sm:text-xl dark:text-white">
-                  Change Password
-                </h2>
-
-                <p className="mt-1 text-xs leading-5 text-slate-500 sm:mt-1.5 sm:text-sm sm:leading-6 dark:text-slate-400">
-                  Enter your current password and choose a new one.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                disabled={passwordSaving}
-                onClick={closePasswordModal}
-                aria-label="Close"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-2xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-              >
-                ×
-              </button>
-
-            </div>
-
-            {passwordError && (
-              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-3 text-xs font-medium text-red-600 sm:px-4 sm:text-sm dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
-                {passwordError}
-              </div>
-            )}
-
-            {passwordSuccess && (
-              <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-3 py-3 text-xs font-medium text-green-700 sm:px-4 sm:text-sm dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-300">
-                {passwordSuccess}
-              </div>
-            )}
-
-            <form
-              onSubmit={handleChangePassword}
-              className="space-y-3.5 sm:space-y-4"
-            >
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
-                  Current Password
-                </label>
-
-                <input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(event) =>
-                    setCurrentPassword(
-                      event.target.value
-                    )
-                  }
-                  autoComplete="current-password"
-                  placeholder="Enter current password"
-                  disabled={passwordSaving}
-                  className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:px-4 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
-                  New Password
-                </label>
-
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(event) =>
-                    setNewPassword(
-                      event.target.value
-                    )
-                  }
-                  autoComplete="new-password"
-                  placeholder="Enter new password"
-                  disabled={passwordSaving}
-                  className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:px-4 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
-                  Confirm New Password
-                </label>
-
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(event) =>
-                    setConfirmPassword(
-                      event.target.value
-                    )
-                  }
-                  autoComplete="new-password"
-                  placeholder="Confirm new password"
-                  disabled={passwordSaving}
-                  className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:px-4 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-indigo-500/20"
-                />
-              </div>
-
-              <div className="flex flex-col gap-2.5 border-t border-slate-100 pt-4 sm:flex-row sm:gap-3 sm:pt-5 dark:border-slate-800">
-
-                <button
-                  type="button"
-                  disabled={passwordSaving}
-                  onClick={closePasswordModal}
-                  className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={passwordSaving}
-                  className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {passwordSaving
-                    ? "Changing..."
-                    : "Change Password"}
-                </button>
-
-              </div>
-
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Delete modal */}
-      {showDeleteModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/75 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6"
-          onClick={closeDeleteModal}
-        >
-          <div
-            className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-3xl border border-red-200 bg-white p-4 shadow-2xl sm:rounded-3xl sm:p-6 dark:border-red-900/60 dark:bg-slate-900"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
-          >
-
-            <div className="mb-4 flex items-start justify-between gap-3 sm:mb-6 sm:gap-4">
-
-              <div>
-                <div className="mb-2.5 flex h-11 w-11 items-center justify-center rounded-full bg-red-500/10 text-red-500 sm:mb-3 sm:h-12 sm:w-12">
-                  <Icon name="trash" size={21} />
-                </div>
-
-                <h2 className="text-lg font-bold text-slate-900 sm:text-xl dark:text-white">
-                  Delete Account
-                </h2>
-
-                <p className="mt-2 text-xs leading-5 text-slate-500 sm:text-sm sm:leading-6 dark:text-slate-400">
-                  This action is permanent. Your account and associated CampusConnect data will be deleted.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                disabled={deletingAccount}
-                onClick={closeDeleteModal}
-                aria-label="Close"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-2xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-              >
-                ×
-              </button>
-
-            </div>
-
-            <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-3.5 sm:p-4 dark:border-red-900/50 dark:bg-red-950/30">
-
-              <p className="text-sm font-semibold text-red-700 dark:text-red-300">
-                This cannot be undone.
-              </p>
-
-              <p className="mt-1.5 text-xs leading-5 text-red-600 dark:text-red-400">
-                Your profile, posts, owned collaborations, owned events, messages, notifications and account data will be removed.
-              </p>
-
-            </div>
-
-            {deleteError && (
-              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-3 text-xs font-medium text-red-600 sm:px-4 sm:text-sm dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
-                {deleteError}
-              </div>
-            )}
-
-            <form
-              onSubmit={handleDeleteAccount}
-              className="space-y-3.5 sm:space-y-4"
-            >
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
-                  Current Password
-                </label>
-
-                <input
-                  type="password"
-                  value={deletePassword}
-                  onChange={(event) =>
-                    setDeletePassword(
-                      event.target.value
-                    )
-                  }
-                  autoComplete="current-password"
-                  placeholder="Enter your current password"
-                  disabled={deletingAccount}
-                  className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-red-500 focus:ring-2 focus:ring-red-100 sm:px-4 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-red-500/10"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
-                  Type DELETE to confirm
-                </label>
-
-                <input
-                  type="text"
-                  value={deleteConfirmation}
-                  onChange={(event) =>
-                    setDeleteConfirmation(
-                      event.target.value
-                    )
-                  }
-                  placeholder="DELETE"
-                  autoComplete="off"
-                  disabled={deletingAccount}
-                  className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm font-medium uppercase text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-red-500 focus:ring-2 focus:ring-red-100 sm:px-4 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-red-500/10"
-                />
-              </div>
-
-              <div className="flex flex-col gap-2.5 border-t border-slate-100 pt-4 sm:flex-row sm:gap-3 sm:pt-5 dark:border-slate-800">
-
-                <button
-                  type="button"
-                  disabled={deletingAccount}
-                  onClick={closeDeleteModal}
-                  className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={deletingAccount}
-                  className="flex-1 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {deletingAccount
-                    ? "Deleting..."
-                    : "Delete Account"}
-                </button>
-
-              </div>
-
-            </form>
-          </div>
-        </div>
-      )}
-
+      <DeleteAccountPanel
+        open={showDeleteAccount}
+        onClose={() => setShowDeleteAccount(false)}
+        onDeleted={logout}
+      />
     </div>
   );
 }

@@ -1,7 +1,11 @@
-import API_URL from "./api";
+import { apiFetch, API_URL } from "./api";
 
 const getHeaders = () => {
   const token = localStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("You must be logged in.");
+  }
 
   return {
     "Content-Type": "application/json",
@@ -10,26 +14,17 @@ const getHeaders = () => {
 };
 
 const getPosts = async () => {
-  const response = await fetch(
+  return apiFetch(
     `${API_URL}/posts`,
     {
+      method: "GET",
       headers: getHeaders(),
     }
   );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || "Failed to load posts"
-    );
-  }
-
-  return data;
 };
 
 const createPost = async (postData) => {
-  const response = await fetch(
+  return apiFetch(
     `${API_URL}/posts`,
     {
       method: "POST",
@@ -37,20 +32,13 @@ const createPost = async (postData) => {
       body: JSON.stringify(postData),
     }
   );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || "Failed to create post"
-    );
-  }
-
-  return data;
 };
 
-const updatePost = async (postId, postData) => {
-  const response = await fetch(
+const updatePost = async (
+  postId,
+  postData
+) => {
+  return apiFetch(
     `${API_URL}/posts/${postId}`,
     {
       method: "PUT",
@@ -58,56 +46,26 @@ const updatePost = async (postId, postData) => {
       body: JSON.stringify(postData),
     }
   );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || "Failed to update post"
-    );
-  }
-
-  return data;
 };
 
 const deletePost = async (postId) => {
-  const response = await fetch(
+  return apiFetch(
     `${API_URL}/posts/${postId}`,
     {
       method: "DELETE",
       headers: getHeaders(),
     }
   );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || "Failed to delete post"
-    );
-  }
-
-  return data;
 };
 
 const toggleLike = async (postId) => {
-  const response = await fetch(
+  return apiFetch(
     `${API_URL}/posts/${postId}/like`,
     {
       method: "POST",
       headers: getHeaders(),
     }
   );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || "Failed to update like"
-    );
-  }
-
-  return data;
 };
 
 const postService = {

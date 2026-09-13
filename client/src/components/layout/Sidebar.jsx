@@ -1,4 +1,8 @@
-import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import {
+  NavLink,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "../../context/AuthContext";
@@ -7,12 +11,24 @@ import socket from "../../socket/socket";
 
 const navigation = [
   { name: "Home", path: "/app" },
-  { name: "Collaborate", path: "/app/collaborations" },
+  {
+    name: "Collaborate",
+    path: "/app/collaborations",
+  },
   { name: "Events", path: "/app/events" },
-  { name: "Discover", path: "/app/discover" },
+  {
+    name: "Discover",
+    path: "/app/discover",
+  },
   { name: "Search", path: "/app/search" },
-  { name: "My Network", path: "/app/network" },
-  { name: "Messages", path: "/app/messages" },
+  {
+    name: "My Network",
+    path: "/app/network",
+  },
+  {
+    name: "Messages",
+    path: "/app/messages",
+  },
 ];
 
 const bottomNavigation = [
@@ -21,31 +37,60 @@ const bottomNavigation = [
 ];
 
 function Sidebar() {
-  // Add these
-  const { logout } = useAuth();
+  const {
+    logout,
+    user,
+    loading: authLoading,
+  } = useAuth();
+
   const navigate = useNavigate();
   const location = useLocation();
-  const [unreadCount, setUnreadCount] = useState(0);
+
+  const [unreadCount, setUnreadCount] =
+    useState(0);
 
   useEffect(() => {
+    /*
+     * Do not call the protected messages endpoint
+     * while AuthContext is still restoring the user.
+     */
+    if (authLoading || !user?._id) {
+      return;
+    }
+
+    let isMounted = true;
+
     const loadUnreadCount = async () => {
       try {
         const conversations =
           await messageService.getConversations();
 
+        if (!isMounted) {
+          return;
+        }
+
         const totalUnread =
           conversations.reduce(
             (total, conversation) =>
-              total + (conversation.unreadCount || 0),
+              total +
+              (conversation.unreadCount || 0),
             0
           );
 
         setUnreadCount(totalUnread);
       } catch (error) {
-        console.error(
-          "Failed to load unread messages:",
-          error
-        );
+        /*
+         * Authentication failures are already handled
+         * centrally by apiFetch/AuthContext.
+         * Avoid noisy console errors when the component
+         * is unmounted during navigation or logout.
+         */
+        if (isMounted) {
+          console.error(
+            "Failed to load unread messages:",
+            error
+          );
+        }
       }
     };
 
@@ -70,6 +115,8 @@ function Sidebar() {
     );
 
     return () => {
+      isMounted = false;
+
       socket.off(
         "newMessage",
         handleNewMessage
@@ -80,9 +127,12 @@ function Sidebar() {
         handleMessagesRead
       );
     };
-  }, [location.pathname]);
+  }, [
+    authLoading,
+    user?._id,
+    location.pathname,
+  ]);
 
-  // Add this function
   const handleLogout = () => {
     logout();
     navigate("/login");
@@ -97,6 +147,7 @@ function Sidebar() {
 
   return (
     <aside className="hidden min-h-screen w-64 flex-col border-r border-slate-200 bg-white p-4 transition-colors dark:border-slate-800 dark:bg-slate-950 md:flex">
+
       <div className="mb-10 px-2">
         <h1 className="text-2xl font-bold text-indigo-600">
           CampusConnect
@@ -112,10 +163,14 @@ function Sidebar() {
           <NavLink
             key={item.path}
             to={item.path}
+            end={item.path === "/app"}
             className={linkClasses}
           >
             <div className="flex items-center justify-between">
-              <span>{item.name}</span>
+
+              <span>
+                {item.name}
+              </span>
 
               {item.name === "Messages" &&
                 unreadCount > 0 && (
@@ -125,12 +180,14 @@ function Sidebar() {
                       : unreadCount}
                   </span>
                 )}
+
             </div>
           </NavLink>
         ))}
       </nav>
 
       <div className="mt-auto space-y-2">
+
         {bottomNavigation.map((item) => (
           <NavLink
             key={item.path}
@@ -141,13 +198,14 @@ function Sidebar() {
           </NavLink>
         ))}
 
-        {/* Updated Logout button */}
         <button
+          type="button"
           onClick={handleLogout}
           className="w-full rounded-lg px-4 py-3 text-left text-red-500 transition hover:bg-red-50 dark:hover:bg-red-950/40"
         >
           Logout
         </button>
+
       </div>
     </aside>
   );
