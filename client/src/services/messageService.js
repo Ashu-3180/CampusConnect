@@ -1,7 +1,11 @@
-import API_URL from "./api";
+import { apiFetch, API_URL } from "./api";
 
 const getHeaders = () => {
   const token = localStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("You must be logged in.");
+  }
 
   return {
     Authorization: `Bearer ${token}`,
@@ -11,44 +15,26 @@ const getHeaders = () => {
 
 // Get all conversations
 const getConversations = async () => {
-  const response = await fetch(
+  const data = await apiFetch(
     `${API_URL}/messages`,
     {
+      method: "GET",
       headers: getHeaders(),
     }
   );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message ||
-        "Failed to load conversations"
-    );
-  }
 
   return data.conversations;
 };
 
 // Get conversation with a user
 const getConversation = async (userId) => {
-  const response = await fetch(
+  return apiFetch(
     `${API_URL}/messages/${userId}`,
     {
+      method: "GET",
       headers: getHeaders(),
     }
   );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message ||
-        "Failed to load conversation"
-    );
-  }
-
-  return data;
 };
 
 // Send a message
@@ -56,7 +42,7 @@ const sendMessage = async (
   receiverId,
   content
 ) => {
-  const response = await fetch(
+  const data = await apiFetch(
     `${API_URL}/messages`,
     {
       method: "POST",
@@ -67,15 +53,6 @@ const sendMessage = async (
       }),
     }
   );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message ||
-        "Failed to send message"
-    );
-  }
 
   return data.message;
 };

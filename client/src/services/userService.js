@@ -1,4 +1,4 @@
-import API_URL from "./api";
+import { apiFetch, API_URL } from "./api";
 
 const getHeaders = () => {
   const token = localStorage.getItem("token");
@@ -14,43 +14,18 @@ const getHeaders = () => {
 };
 
 const getMyProfile = async () => {
-  const response = await fetch(
-    `${API_URL}/users/me`,
-    {
-      headers: getHeaders(),
-    }
-  );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || "Failed to load profile"
-    );
-  }
-
-  return data;
+  return apiFetch(`${API_URL}/users/me`, {
+    method: "GET",
+    headers: getHeaders(),
+  });
 };
 
 const updateMyProfile = async (profileData) => {
-  const response = await fetch(
-    `${API_URL}/users/me`,
-    {
-      method: "PUT",
-      headers: getHeaders(),
-      body: JSON.stringify(profileData),
-    }
-  );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || "Failed to update profile"
-    );
-  }
-
-  return data;
+  return apiFetch(`${API_URL}/users/me`, {
+    method: "PUT",
+    headers: getHeaders(),
+    body: JSON.stringify(profileData),
+  });
 };
 
 const uploadProfileImage = async (file) => {
@@ -66,7 +41,7 @@ const uploadProfileImage = async (file) => {
 
   formData.append("profileImage", file);
 
-  const response = await fetch(
+  return apiFetch(
     `${API_URL}/users/me/profile-image`,
     {
       method: "POST",
@@ -76,43 +51,22 @@ const uploadProfileImage = async (file) => {
       body: formData,
     }
   );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message ||
-        "Failed to upload profile photo"
-    );
-  }
-
-  return data;
 };
 
 const getMyPreferences = async () => {
-  const response = await fetch(
+  return apiFetch(
     `${API_URL}/users/me/preferences`,
     {
+      method: "GET",
       headers: getHeaders(),
     }
   );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message ||
-        "Failed to load preferences"
-    );
-  }
-
-  return data;
 };
 
 const updateMyPreferences = async (
   preferences
 ) => {
-  const response = await fetch(
+  return apiFetch(
     `${API_URL}/users/me/preferences`,
     {
       method: "PUT",
@@ -120,17 +74,6 @@ const updateMyPreferences = async (
       body: JSON.stringify(preferences),
     }
   );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message ||
-        "Failed to update preferences"
-    );
-  }
-
-  return data;
 };
 
 const getStudents = async (search = "") => {
@@ -138,41 +81,23 @@ const getStudents = async (search = "") => {
     ? `?search=${encodeURIComponent(search)}`
     : "";
 
-  const response = await fetch(
+  return apiFetch(
     `${API_URL}/users${query}`,
     {
+      method: "GET",
       headers: getHeaders(),
     }
   );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || "Failed to load students"
-    );
-  }
-
-  return data;
 };
 
 const getUserProfile = async (userId) => {
-  const response = await fetch(
+  return apiFetch(
     `${API_URL}/users/${userId}`,
     {
+      method: "GET",
       headers: getHeaders(),
     }
   );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || "Failed to load profile"
-    );
-  }
-
-  return data;
 };
 
 const userService = {
