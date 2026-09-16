@@ -21,42 +21,32 @@ const formatMessageTime = (dateString) => {
 
   const yesterday = new Date();
 
-  yesterday.setDate(
-    now.getDate() - 1
-  );
+  yesterday.setDate(now.getDate() - 1);
 
   const isYesterday =
-    date.toDateString() ===
-    yesterday.toDateString();
+    date.toDateString() === yesterday.toDateString();
 
   if (isYesterday) {
-    return `Yesterday ${date.toLocaleTimeString(
-      [],
-      {
-        hour: "2-digit",
-        minute: "2-digit",
-      }
-    )}`;
+    return `Yesterday ${date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    })}`;
   }
 
-  return date.toLocaleDateString(
-    [],
-    {
+  return (
+    date.toLocaleDateString([], {
       month: "short",
       day: "numeric",
       year:
-        date.getFullYear() !==
-        now.getFullYear()
+        date.getFullYear() !== now.getFullYear()
           ? "numeric"
           : undefined,
-    }
-  ) + ` ${date.toLocaleTimeString(
-    [],
-    {
+    }) +
+    ` ${date.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
-    }
-  )}`;
+    })}`
+  );
 };
 
 function Chat() {
@@ -67,38 +57,19 @@ function Chat() {
     loading: authLoading,
   } = useAuth();
 
-  const [otherUser, setOtherUser] =
-    useState(null);
-
-  const [messages, setMessages] =
-    useState([]);
-
-  const [content, setContent] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [sending, setSending] =
-    useState(false);
-
-  const [error, setError] =
-    useState("");
-
-  const [onlineUsers, setOnlineUsers] =
-    useState([]);
-
+  const [otherUser, setOtherUser] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [content, setContent] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+  const [onlineUsers, setOnlineUsers] = useState([]);
   const [isOtherUserTyping, setIsOtherUserTyping] =
     useState(false);
 
-  const messagesEndRef =
-    useRef(null);
-
-  const typingTimeoutRef =
-    useRef(null);
-
-  const messageInputRef =
-    useRef(null);
+  const messagesEndRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+  const messageInputRef = useRef(null);
 
   const loadConversation = async () => {
     try {
@@ -106,16 +77,13 @@ function Chat() {
       setError("");
 
       const data =
-        await messageService.getConversation(
-          userId
-        );
+        await messageService.getConversation(userId);
 
       setOtherUser(data.otherUser);
-      setMessages(data.messages);
+      setMessages(data.messages || []);
     } catch (error) {
       setError(
-        error.message ||
-          "Failed to load conversation"
+        error.message || "Failed to load conversation"
       );
     } finally {
       setLoading(false);
@@ -123,23 +91,19 @@ function Chat() {
   };
 
   /*
-   * Wait for authentication to finish before
-   * loading the conversation.
-   *
-   * This prevents the message UI from rendering
-   * before user._id is available, which previously
-   * caused every message to temporarily be treated
-   * as an incoming message.
+   * Load the conversation only after authentication
+   * has finished and the current user is available.
    */
   useEffect(() => {
-    /*
-     * Once the authenticated user exists, the login
-     * flow has provided everything this page needs.
-     * Do not block conversation loading on the separate
-     * authLoading flag, because that flag can remain true
-     * during the initial login flow.
-     */
+    if (authLoading) {
+      return;
+    }
+
     if (!user?._id || !userId) {
+      setLoading(false);
+      setError(
+        "Unable to verify your login session."
+      );
       return;
     }
 
@@ -160,24 +124,21 @@ function Chat() {
     return () => {
       cancelled = true;
     };
-  }, [
-    userId,
-    user?._id,
-  ]);
+  }, [userId, user?._id, authLoading]);
 
+  /*
+   * Handle incoming messages through Socket.IO.
+   */
   useEffect(() => {
     const handleNewMessage = (newMessage) => {
-      const senderId =
-        newMessage.sender._id;
+      const senderId = newMessage.sender?._id;
 
       if (senderId === userId) {
         setMessages((previousMessages) => {
-          const alreadyExists =
-            previousMessages.some(
-              (message) =>
-                message._id ===
-                newMessage._id
-            );
+          const alreadyExists = previousMessages.some(
+            (message) =>
+              message._id === newMessage._id
+          );
 
           if (alreadyExists) {
             return previousMessages;
@@ -191,29 +152,23 @@ function Chat() {
       }
     };
 
-    socket.on(
-      "newMessage",
-      handleNewMessage
-    );
+    socket.on("newMessage", handleNewMessage);
 
     return () => {
-      socket.off(
-        "newMessage",
-        handleNewMessage
-      );
+      socket.off("newMessage", handleNewMessage);
     };
   }, [userId]);
 
+  /*
+   * Handle read receipts.
+   */
   useEffect(() => {
-    const handleMessagesRead = ({
-      readerId,
-    }) => {
+    const handleMessagesRead = ({ readerId }) => {
       if (readerId === userId) {
         setMessages((previousMessages) =>
           previousMessages.map((message) => {
             if (
-              message.sender._id ===
-              user?._id
+              message.sender?._id === user?._id
             ) {
               return {
                 ...message,
@@ -238,11 +193,11 @@ function Chat() {
         handleMessagesRead
       );
     };
-  }, [
-    userId,
-    user?._id,
-  ]);
+  }, [userId, user?._id]);
 
+  /*
+   * Handle online users.
+   */
   useEffect(() => {
     const handleOnlineUsers = (users) => {
       setOnlineUsers(users);
@@ -261,39 +216,27 @@ function Chat() {
     };
   }, []);
 
+  /*
+   * Handle typing events.
+   */
   useEffect(() => {
-    const handleTyping = ({
-      senderId,
-    }) => {
+    const handleTyping = ({ senderId }) => {
       if (senderId === userId) {
         setIsOtherUserTyping(true);
       }
     };
 
-    const handleStopTyping = ({
-      senderId,
-    }) => {
+    const handleStopTyping = ({ senderId }) => {
       if (senderId === userId) {
         setIsOtherUserTyping(false);
       }
     };
 
-    socket.on(
-      "typing",
-      handleTyping
-    );
-
-    socket.on(
-      "stopTyping",
-      handleStopTyping
-    );
+    socket.on("typing", handleTyping);
+    socket.on("stopTyping", handleStopTyping);
 
     return () => {
-      socket.off(
-        "typing",
-        handleTyping
-      );
-
+      socket.off("typing", handleTyping);
       socket.off(
         "stopTyping",
         handleStopTyping
@@ -301,36 +244,40 @@ function Chat() {
     };
   }, [userId]);
 
+  /*
+   * Focus the message input after loading.
+   */
   useEffect(() => {
-    if (
-      !authLoading &&
-      !loading
-    ) {
+    if (!authLoading && !loading && otherUser) {
       messageInputRef.current?.focus();
     }
-  }, [
-    authLoading,
-    loading,
-  ]);
+  }, [authLoading, loading, otherUser]);
 
+  /*
+   * Automatically scroll to the latest message.
+   */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
     });
   }, [messages]);
 
+  /*
+   * Stop typing when leaving the chat.
+   */
   useEffect(() => {
     return () => {
       socket.emit("stopTyping", {
         receiverId: userId,
       });
 
-      clearTimeout(
-        typingTimeoutRef.current
-      );
+      clearTimeout(typingTimeoutRef.current);
     };
   }, [userId]);
 
+  /*
+   * Handle typing in the message input.
+   */
   const handleTyping = (event) => {
     const value = event.target.value;
 
@@ -341,9 +288,7 @@ function Chat() {
         receiverId: userId,
       });
 
-      clearTimeout(
-        typingTimeoutRef.current
-      );
+      clearTimeout(typingTimeoutRef.current);
 
       return;
     }
@@ -352,18 +297,18 @@ function Chat() {
       receiverId: userId,
     });
 
-    clearTimeout(
-      typingTimeoutRef.current
-    );
+    clearTimeout(typingTimeoutRef.current);
 
-    typingTimeoutRef.current =
-      setTimeout(() => {
-        socket.emit("stopTyping", {
-          receiverId: userId,
-        });
-      }, 1000);
+    typingTimeoutRef.current = setTimeout(() => {
+      socket.emit("stopTyping", {
+        receiverId: userId,
+      });
+    }, 1000);
   };
 
+  /*
+   * Send a new message.
+   */
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -382,7 +327,7 @@ function Chat() {
       const newMessage =
         await messageService.sendMessage(
           userId,
-          content
+          content.trim()
         );
 
       setMessages((previousMessages) => [
@@ -396,18 +341,14 @@ function Chat() {
         receiverId: userId,
       });
 
-      clearTimeout(
-        typingTimeoutRef.current
-      );
+      clearTimeout(typingTimeoutRef.current);
 
       setTimeout(() => {
         messageInputRef.current?.focus();
       }, 0);
-
     } catch (error) {
       setError(
-        error.message ||
-          "Failed to send message"
+        error.message || "Failed to send message"
       );
     } finally {
       setSending(false);
@@ -415,33 +356,76 @@ function Chat() {
   };
 
   /*
-   * Authentication must finish before the
-   * conversation UI is allowed to render.
+   * Show authentication loading state.
    */
-  if (
-    !user?._id ||
-    loading
-  ) {
+  if (authLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="text-center">
-
           <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-indigo-100 border-t-indigo-600 dark:border-indigo-950 dark:border-t-indigo-500" />
 
           <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
-            Loading conversation...
+            Verifying login session...
           </p>
-
         </div>
       </div>
     );
   }
 
+  /*
+   * Show login error when the user is unavailable.
+   */
+  if (!user?._id) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <div className="text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-3xl dark:bg-red-950/40">
+            🔒
+          </div>
+
+          <h2 className="mt-5 text-xl font-semibold text-slate-800 dark:text-white">
+            Login Required
+          </h2>
+
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+            Your login session could not be verified.
+          </p>
+
+          <Link
+            to="/login"
+            className="mt-6 inline-flex rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-700"
+          >
+            Login Again
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  /*
+   * Show conversation loading state.
+   */
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-indigo-100 border-t-indigo-600 dark:border-indigo-950 dark:border-t-indigo-500" />
+
+          <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+            Loading conversation...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  /*
+   * Show an error when the conversation cannot be loaded.
+   */
   if (!otherUser) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center px-4">
         <div className="max-w-md text-center">
-
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-3xl dark:bg-red-950/40">
             💬
           </div>
@@ -461,29 +445,23 @@ function Chat() {
           >
             Back to Messages
           </Link>
-
         </div>
       </div>
     );
   }
 
   const initial = otherUser.name
-    ? otherUser.name
-        .charAt(0)
-        .toUpperCase()
+    ? otherUser.name.charAt(0).toUpperCase()
     : "U";
 
-  const isOtherUserOnline =
-    onlineUsers.includes(
-      otherUser._id.toString()
-    );
+  const isOtherUserOnline = onlineUsers.includes(
+    otherUser._id?.toString()
+  );
 
   return (
     <div className="mx-auto flex h-[calc(100vh-9rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-950">
-
       {/* Chat Header */}
       <div className="flex items-center gap-4 border-b border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
-
         <Link
           to="/app/messages"
           className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
@@ -512,9 +490,7 @@ function Chat() {
           )}
 
           <div className="min-w-0">
-
             <div className="flex items-center gap-2">
-
               <h1 className="truncate font-semibold text-slate-900 dark:text-white">
                 {otherUser.name}
               </h1>
@@ -526,7 +502,6 @@ function Chat() {
                     : "bg-slate-300 dark:bg-slate-600"
                 }`}
               />
-
             </div>
 
             <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -534,10 +509,8 @@ function Chat() {
                 ? "Online"
                 : "Offline"}
             </p>
-
           </div>
         </Link>
-
       </div>
 
       {/* Error */}
@@ -549,13 +522,9 @@ function Chat() {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto bg-slate-100 p-5 dark:bg-slate-950">
-
         {messages.length === 0 ? (
-
           <div className="flex h-full items-center justify-center px-6 text-center">
-
             <div>
-
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50 text-3xl dark:bg-indigo-500/10">
                 👋
               </div>
@@ -567,20 +536,13 @@ function Chat() {
               <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                 Send a message to {otherUser.name} and start collaborating on ideas, projects, and opportunities.
               </p>
-
             </div>
-
           </div>
-
         ) : (
-
           <div className="space-y-4">
-
             {messages.map((message) => {
-
               const isMine =
-                message.sender._id ===
-                user._id;
+                message.sender?._id === user._id;
 
               return (
                 <div
@@ -591,7 +553,6 @@ function Chat() {
                       : "justify-start"
                   }`}
                 >
-
                   <div
                     className={`max-w-[75%] rounded-2xl px-4 py-2.5 shadow-sm ${
                       isMine
@@ -599,7 +560,6 @@ function Chat() {
                         : "rounded-bl-md border border-slate-200 bg-white text-slate-800 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
                     }`}
                   >
-
                     <p className="break-words text-sm">
                       {message.content}
                     </p>
@@ -611,7 +571,6 @@ function Chat() {
                           : "text-slate-400 dark:text-slate-500"
                       }`}
                     >
-
                       <span>
                         {formatMessageTime(
                           message.createdAt
@@ -625,30 +584,23 @@ function Chat() {
                             : "✓"}
                         </span>
                       )}
-
                     </div>
-
                   </div>
-
                 </div>
               );
             })}
 
             {isOtherUserTyping && (
               <div className="flex justify-start">
-
                 <div className="rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
                   {otherUser.name} is typing...
                 </div>
-
               </div>
             )}
 
             <div ref={messagesEndRef} />
-
           </div>
         )}
-
       </div>
 
       {/* Message Input */}
@@ -656,9 +608,7 @@ function Chat() {
         onSubmit={handleSubmit}
         className="border-t border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950"
       >
-
         <div className="flex gap-3">
-
           <input
             ref={messageInputRef}
             type="text"
@@ -672,21 +622,13 @@ function Chat() {
 
           <button
             type="submit"
-            disabled={
-              !content.trim() ||
-              sending
-            }
+            disabled={!content.trim() || sending}
             className="rounded-xl bg-indigo-600 px-5 py-2.5 font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {sending
-              ? "Sending..."
-              : "Send"}
+            {sending ? "Sending..." : "Send"}
           </button>
-
         </div>
-
       </form>
-
     </div>
   );
 }
