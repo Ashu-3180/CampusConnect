@@ -5,6 +5,54 @@ const sharp = require("sharp");
 const User = require("../models/User");
 const Post = require("../models/Post");
 const createNotification = require("../utils/createNotification");
+const {
+  buildProfileImageUrl,
+  normalizeProfileImageUrl,
+} = require("../utils/profileImageUrl");
+
+const withNormalizedProfileImage = (user, req) => {
+  if (!user) {
+    return user;
+  }
+
+  const plain =
+    typeof user.toObject === "function"
+      ? user.toObject()
+      : { ...user };
+
+  if (plain.profileImage) {
+    plain.profileImage = normalizeProfileImageUrl(
+      plain.profileImage,
+      req
+    );
+  }
+
+  return plain;
+};
+const {
+  buildProfileImageUrl,
+  normalizeProfileImageUrl,
+} = require("../utils/profileImageUrl");
+
+const withNormalizedProfileImage = (user, req) => {
+  if (!user) {
+    return user;
+  }
+
+  const plain =
+    typeof user.toObject === "function"
+      ? user.toObject()
+      : { ...user };
+
+  if (plain.profileImage) {
+    plain.profileImage = normalizeProfileImageUrl(
+      plain.profileImage,
+      req
+    );
+  }
+
+  return plain;
+};
 
 const getMyProfile = async (req, res, next) => {
   try {
@@ -19,7 +67,7 @@ const getMyProfile = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      user,
+      user: withNormalizedProfileImage(user, req),
     });
   } catch (error) {
     next(error);
@@ -69,7 +117,7 @@ const updateMyProfile = async (
     res.status(200).json({
       success: true,
       message: "Profile updated successfully",
-      user,
+      user: withNormalizedProfileImage(user, req),
     });
   } catch (error) {
     next(error);
@@ -382,9 +430,7 @@ const uploadProfileImage = async (req, res, next) => {
       })
       .toFile(outputPath);
 
-    const imageUrl = `${req.protocol}://${req.get(
-      "host"
-    )}/uploads/profile-images/${fileName}`;
+    const imageUrl = buildProfileImageUrl(req, fileName);
 
     const user = await User.findByIdAndUpdate(
       req.user.userId,
@@ -405,7 +451,7 @@ const uploadProfileImage = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Profile image uploaded successfully",
-      user,
+      user: withNormalizedProfileImage(user, req),
     });
   } catch (error) {
     next(error);

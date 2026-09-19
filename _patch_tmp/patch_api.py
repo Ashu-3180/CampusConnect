@@ -1,6 +1,11 @@
-const API_URL =
+﻿from pathlib import Path
+
+root = Path(r"E:/Projects/CampusConnect")
+
+api_js = root / "client/src/services/api.js"
+api_js.write_text("""const API_URL =
   import.meta.env.VITE_API_URL ||
-  "http://localhost:5000/api";
+  \"http://localhost:5000/api\";
 
 /**
  * Origin used to serve uploaded files.
@@ -10,7 +15,7 @@ function getUploadsOrigin() {
   try {
     return new URL(API_URL).origin;
   } catch {
-    return "https://campusconnect-api-b6x6.onrender.com";
+    return \"https://campusconnect-api-b6x6.onrender.com\";
   }
 }
 
@@ -24,25 +29,25 @@ function getUploadsOrigin() {
  * http://127.0.0.1:5000/uploads/profile-images/example.webp
  */
 function normalizeImageUrl(value) {
-  if (typeof value !== "string" || !value.trim()) {
+  if (typeof value !== \"string\" || !value.trim()) {
     return value;
   }
 
   const origin = getUploadsOrigin();
 
-  if (value.startsWith("/uploads/")) {
+  if (value.startsWith(\"/uploads/\")) {
     return `${origin}${value}`;
   }
 
   try {
     const parsed = new URL(value);
     const isLocalHost =
-      parsed.hostname === "localhost" ||
-      parsed.hostname === "127.0.0.1";
+      parsed.hostname === \"localhost\" ||
+      parsed.hostname === \"127.0.0.1\";
 
     if (
       isLocalHost &&
-      parsed.pathname.startsWith("/uploads/")
+      parsed.pathname.startsWith(\"/uploads/\")
     ) {
       return `${origin}${parsed.pathname}`;
     }
@@ -66,17 +71,17 @@ function normalizeResponseData(data) {
 
   if (
     data !== null &&
-    typeof data === "object"
+    typeof data === \"object\"
   ) {
     const normalizedData = {};
 
     for (const [key, value] of Object.entries(data)) {
       if (
-        typeof value === "string" &&
+        typeof value === \"string\" &&
         (
-          key === "profileImage" ||
-          key === "avatar" ||
-          key === "image"
+          key === \"profileImage\" ||
+          key === \"avatar\" ||
+          key === \"image\"
         )
       ) {
         normalizedData[key] =
@@ -101,7 +106,7 @@ function isAuthenticationFailure(status, message) {
     return false;
   }
 
-  const normalizedMessage = String(message || "")
+  const normalizedMessage = String(message || \"\")
     .toLowerCase()
     .trim();
 
@@ -110,12 +115,12 @@ function isAuthenticationFailure(status, message) {
   }
 
   return (
-    normalizedMessage.includes("session expired") ||
-    normalizedMessage.includes("token is required") ||
-    normalizedMessage.includes("jwt expired") ||
-    normalizedMessage.includes("jwt malformed") ||
-    normalizedMessage.includes("invalid token") ||
-    normalizedMessage.includes("authentication token")
+    normalizedMessage.includes(\"session expired\") ||
+    normalizedMessage.includes(\"token is required\") ||
+    normalizedMessage.includes(\"jwt expired\") ||
+    normalizedMessage.includes(\"jwt malformed\") ||
+    normalizedMessage.includes(\"invalid token\") ||
+    normalizedMessage.includes(\"authentication token\")
   );
 }
 
@@ -142,7 +147,7 @@ export async function apiFetch(
     ...options,
 
     // Prevent stale API responses.
-    cache: "no-store",
+    cache: \"no-store\",
 
     headers: {
       ...options.headers,
@@ -170,12 +175,12 @@ export async function apiFetch(
   ) {
     window.dispatchEvent(
       new CustomEvent(
-        "campusconnect:session-expired",
+        \"campusconnect:session-expired\",
         {
           detail: {
             message:
               normalizedData?.message ||
-              "Session expired. Please log in again.",
+              \"Session expired. Please log in again.\",
           },
         }
       )
@@ -204,3 +209,5 @@ export {
 };
 
 export default API_URL;
+""", encoding="utf-8")
+print("api.js updated")

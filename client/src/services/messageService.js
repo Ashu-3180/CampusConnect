@@ -27,12 +27,17 @@ const getConversations = async () => {
 };
 
 // Get conversation with a user
-const getConversation = async (userId) => {
+const getConversation = async (userId, signal) => {
+  if (!userId) {
+    throw new Error("Conversation user id is required.");
+  }
+
   return apiFetch(
     `${API_URL}/messages/${userId}`,
     {
       method: "GET",
       headers: getHeaders(),
+      signal,
     }
   );
 };

@@ -7,7 +7,28 @@ import {
 } from "react";
 
 import authService from "../services/authService";
+import { normalizeImageUrl } from "../services/api";
 import socket from "../socket/socket";
+
+function normalizeAuthUser(user) {
+  if (!user || typeof user !== "object") {
+    return user;
+  }
+
+  const normalized = {
+    ...user,
+    // Login/register historically returned `id` instead of `_id`.
+    _id: user._id || user.id,
+  };
+
+  if (normalized.profileImage) {
+    normalized.profileImage = normalizeImageUrl(
+      normalized.profileImage
+    );
+  }
+
+  return normalized;
+}
 
 const AuthContext = createContext();
 
@@ -117,10 +138,10 @@ export function AuthProvider({ children }) {
           return;
         }
 
-        setUser(data.user);
+        setUser(normalizeAuthUser(data.user));
 
         socket.auth = {
-          userId: data.user._id,
+          userId: data.user._id || data.user.id,
         };
 
         socket.connect();
@@ -221,10 +242,10 @@ export function AuthProvider({ children }) {
       data.token
     );
 
-    setUser(data.user);
+    setUser(normalizeAuthUser(data.user));
 
     socket.auth = {
-      userId: data.user._id,
+      userId: data.user._id || data.user.id,
     };
 
     socket.connect();
@@ -250,10 +271,10 @@ export function AuthProvider({ children }) {
       data.token
     );
 
-    setUser(data.user);
+    setUser(normalizeAuthUser(data.user));
 
     socket.auth = {
-      userId: data.user._id,
+      userId: data.user._id || data.user.id,
     };
 
     socket.connect();
@@ -279,7 +300,7 @@ export function AuthProvider({ children }) {
   };
 
   const updateUser = (updatedUser) => {
-    setUser(updatedUser);
+    setUser(normalizeAuthUser(updatedUser));
   };
 
   return (
