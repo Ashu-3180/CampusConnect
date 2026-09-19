@@ -2,28 +2,55 @@ const API_URL =
   import.meta.env.VITE_API_URL ||
   "http://localhost:5000/api";
 
-// Production backend URL
-const PRODUCTION_API_ORIGIN =
-  "https://campusconnect-api-b6x6.onrender.com";
+/**
+ * Origin used to serve uploaded files.
+ * Derived from VITE_API_URL so local and production both work.
+ */
+function getUploadsOrigin() {
+  try {
+    return new URL(API_URL).origin;
+  } catch {
+    return "https://campusconnect-api-b6x6.onrender.com";
+  }
+}
 
 /**
- * Converts old localhost upload URLs into production URLs.
+ * Converts relative and legacy localhost upload URLs into
+ * absolute URLs that point at the configured API origin.
  *
- * Example:
+ * Examples:
+ * /uploads/profile-images/example.webp
  * http://localhost:5000/uploads/profile-images/example.webp
- *
- * Becomes:
- * https://campusconnect-api-b6x6.onrender.com/uploads/profile-images/example.webp
+ * http://127.0.0.1:5000/uploads/profile-images/example.webp
  */
 function normalizeImageUrl(value) {
-  if (typeof value !== "string") {
+  if (typeof value !== "string" || !value.trim()) {
     return value;
   }
 
-  return value.replace(
-    /^http:\/\/localhost:5000(\/uploads\/)/,
-    `${PRODUCTION_API_ORIGIN}$1`
-  );
+  const origin = getUploadsOrigin();
+
+  if (value.startsWith("/uploads/")) {
+    return `${origin}${value}`;
+  }
+
+  try {
+    const parsed = new URL(value);
+    const isLocalHost =
+      parsed.hostname === "localhost" ||
+      parsed.hostname === "127.0.0.1";
+
+    if (
+      isLocalHost &&
+      parsed.pathname.startsWith("/uploads/")
+    ) {
+      return `${origin}${parsed.pathname}`;
+    }
+  } catch {
+    return value;
+  }
+
+  return value;
 }
 
 /**

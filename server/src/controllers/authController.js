@@ -6,9 +6,30 @@ const Notification = require("../models/Notification");
 const Message = require("../models/Message");
 
 const generateToken = require("../utils/generateToken");
+const {
+  normalizeProfileImageUrl,
+} = require("../utils/profileImageUrl");
 
 const path = require("path");
 const fs = require("fs");
+
+const toSafeUser = (user, req) => {
+  const plain =
+    typeof user.toObject === "function"
+      ? user.toObject()
+      : { ...user };
+
+  delete plain.password;
+
+  if (plain.profileImage) {
+    plain.profileImage = normalizeProfileImageUrl(
+      plain.profileImage,
+      req
+    );
+  }
+
+  return plain;
+};
 
 const registerUser = async (req, res, next) => {
   try {
@@ -59,14 +80,7 @@ const registerUser = async (req, res, next) => {
       success: true,
       message: "User registered successfully",
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        university: user.university,
-        course: user.course,
-        graduationYear: user.graduationYear,
-      },
+      user: toSafeUser(user, req),
     });
   } catch (error) {
     next(error);
@@ -105,14 +119,7 @@ const loginUser = async (req, res, next) => {
       success: true,
       message: "Login successful",
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        university: user.university,
-        course: user.course,
-        graduationYear: user.graduationYear,
-      },
+      user: toSafeUser(user, req),
     });
   } catch (error) {
     next(error);
@@ -372,7 +379,7 @@ const getCurrentUser = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      user,
+      user: toSafeUser(user, req),
     });
   } catch (error) {
     next(error);
