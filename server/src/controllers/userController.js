@@ -29,30 +29,6 @@ const withNormalizedProfileImage = (user, req) => {
 
   return plain;
 };
-const {
-  buildProfileImageUrl,
-  normalizeProfileImageUrl,
-} = require("../utils/profileImageUrl");
-
-const withNormalizedProfileImage = (user, req) => {
-  if (!user) {
-    return user;
-  }
-
-  const plain =
-    typeof user.toObject === "function"
-      ? user.toObject()
-      : { ...user };
-
-  if (plain.profileImage) {
-    plain.profileImage = normalizeProfileImageUrl(
-      plain.profileImage,
-      req
-    );
-  }
-
-  return plain;
-};
 
 const getMyProfile = async (req, res, next) => {
   try {

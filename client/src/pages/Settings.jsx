@@ -59,6 +59,18 @@ function Settings() {
         setProfileVisibility(
           preferences.profileVisibility || "everyone"
         );
+
+        // Keep AuthContext in sync so dark mode and
+        // other prefs survive navigation after refresh.
+        if (user) {
+          updateUser({
+            ...user,
+            preferences: {
+              ...user.preferences,
+              ...preferences,
+            },
+          });
+        }
       } catch (requestError) {
         if (mounted) {
           setError(
@@ -381,6 +393,12 @@ function Settings() {
             icon="shield"
             title="Privacy & Safety"
             description="Review your privacy and account safety options"
+            onClick={() => {
+              setError("");
+              setFeedback(
+                "Use Profile Visibility to control who can see your profile. Open Password & Security for account safety."
+              );
+            }}
           />
         </Section>
 
@@ -442,6 +460,12 @@ function Settings() {
             title="Language"
             description="Choose the language used by CampusConnect"
             value="English"
+            onClick={() => {
+              setError("");
+              setFeedback(
+                "CampusConnect currently supports English only."
+              );
+            }}
           />
         </Section>
 
@@ -454,6 +478,7 @@ function Settings() {
             icon="users"
             title="Clubs & Communities"
             description="Manage your campus groups and memberships"
+            onClick={() => navigate("/app/network")}
           />
 
           <div className="mx-3 border-t border-slate-100 dark:border-slate-800" />
@@ -462,6 +487,7 @@ function Settings() {
             icon="info"
             title="Events & Collaborations"
             description="Manage your campus activities and preferences"
+            onClick={() => navigate("/app/events")}
           />
         </Section>
 
@@ -489,6 +515,12 @@ function Settings() {
             icon="info"
             title="Help Center"
             description="Find answers to common questions"
+            onClick={() => {
+              setError("");
+              setFeedback(
+                "Use the main navigation for Discover, Network, Events, and Collaborations. Password help is under Password & Security."
+              );
+            }}
           />
 
           <div className="mx-3 border-t border-slate-100 dark:border-slate-800" />
@@ -497,6 +529,19 @@ function Settings() {
             icon="info"
             title="Report a Problem"
             description="Let us know if something isn't working"
+            onClick={() => {
+              setError("");
+              setFeedback("");
+
+              const subject = encodeURIComponent(
+                "CampusConnect problem report"
+              );
+              const body = encodeURIComponent(
+                `Describe the problem:\n\nAccount: ${email}\nPage: Settings\n`
+              );
+
+              window.location.href = `mailto:support@campusconnect.app?subject=${subject}&body=${body}`;
+            }}
           />
 
           <div className="mx-3 border-t border-slate-100 dark:border-slate-800" />
@@ -506,6 +551,12 @@ function Settings() {
             title="About CampusConnect"
             description="App information and version"
             value="v1.0"
+            onClick={() => {
+              setError("");
+              setFeedback(
+                "CampusConnect v1.0 — connect with students, events, and collaborations on campus."
+              );
+            }}
           />
         </Section>
       </div>
