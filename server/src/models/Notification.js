@@ -24,6 +24,10 @@ const notificationSchema = new mongoose.Schema(
         "connection_accepted",
         "collaboration_application",
         "collaboration_accepted",
+        "event_join",
+        "event_update",
+        "event_reminder",
+        "event_deadline",
       ],
     },
 

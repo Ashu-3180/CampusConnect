@@ -1,4 +1,5 @@
 const Event = require("../models/Event");
+const createNotification = require("../utils/createNotification");
 
 // @desc    Create a new event
 // @route   POST /api/events
@@ -186,6 +187,39 @@ const joinEvent = async (req, res, next) => {
 
     await event.save();
 
+    await createNotification({
+      recipient: event.organizer,
+      sender: userId,
+      type: "event_join",
+      message: `joined your event "${event.title}"`,
+      link: `/app/events`,
+    });
+
+    // In-app attendance confirmation for the joiner (eventReminders).
+    // createNotification skips self, so send via a separate path when
+    // the preference allows — use organizer as sender for the reminder.
+    await createNotification({
+      recipient: userId,
+      sender: event.organizer,
+      type: "event_reminder",
+      message: `You're attending "${event.title}"`,
+      link: `/app/events`,
+    });
+
+    const hoursUntilEvent =
+      (new Date(event.date).getTime() - Date.now()) /
+      (1000 * 60 * 60);
+
+    if (hoursUntilEvent > 0 && hoursUntilEvent <= 48) {
+      await createNotification({
+        recipient: userId,
+        sender: event.organizer,
+        type: "event_deadline",
+        message: `"${event.title}" starts soon`,
+        link: `/app/events`,
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: "Event joined successfully",
@@ -230,6 +264,14 @@ const leaveEvent = async (req, res, next) => {
     );
 
     await event.save();
+
+    await createNotification({
+      recipient: event.organizer,
+      sender: userId,
+      type: "event_update",
+      message: `left your event "${event.title}"`,
+      link: `/app/events`,
+    });
 
     res.status(200).json({
       success: true,
@@ -287,7 +329,26 @@ const deleteEvent = async (req, res, next) => {
       );
     }
 
+    const attendeeIds = event.attendees
+      .map((attendee) => attendee.toString())
+      .filter(
+        (attendeeId) =>
+          attendeeId !== event.organizer.toString()
+      );
+
     await event.deleteOne();
+
+    await Promise.all(
+      attendeeIds.map((attendeeId) =>
+        createNotification({
+          recipient: attendeeId,
+          sender: req.user.userId,
+          type: "event_update",
+          message: `cancelled the event "${event.title}"`,
+          link: `/app/events`,
+        })
+      )
+    );
 
     res.status(200).json({
       success: true,

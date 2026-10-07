@@ -4,11 +4,16 @@ const Collaboration = require("../models/Collaboration");
 const Event = require("../models/Event");
 const Notification = require("../models/Notification");
 const Message = require("../models/Message");
+const Club = require("../models/Club");
 
 const generateToken = require("../utils/generateToken");
 const {
   normalizeProfileImageUrl,
 } = require("../utils/profileImageUrl");
+const {
+  extractProfileImageFileId,
+} = require("../utils/mediaHelpers");
+const { deleteMedia } = require("../services/mediaService");
 
 const path = require("path");
 const fs = require("fs");
@@ -240,6 +245,19 @@ const deleteAccount = async (
 
     const userId = user._id;
 
+    // Collect media file ids before deleting posts.
+    const userPosts = await Post.find({
+      author: userId,
+    }).select("media.fileId");
+
+    const postMediaIds = userPosts
+      .map((post) => post.media?.fileId)
+      .filter(Boolean);
+
+    const profileMediaId = extractProfileImageFileId(
+      user.profileImage
+    );
+
     // 1. Delete the user's posts
     await Post.deleteMany({
       author: userId,
@@ -321,7 +339,38 @@ const deleteAccount = async (
       }
     );
 
-    // 10. Delete locally stored profile images.
+    // 9b. Remove from clubs; delete clubs this user created.
+    await Club.updateMany(
+      {},
+      {
+        $pull: {
+          members: userId,
+        },
+      }
+    );
+
+    await Club.deleteMany({
+      creator: userId,
+    });
+
+    // 10. Delete GridFS profile + post media belonging to this user.
+    const mediaIdsToDelete = [
+      ...postMediaIds,
+      ...(profileMediaId ? [profileMediaId] : []),
+    ];
+
+    for (const mediaId of mediaIdsToDelete) {
+      try {
+        await deleteMedia(mediaId);
+      } catch (mediaError) {
+        console.error(
+          "GridFS media cleanup failed:",
+          mediaError
+        );
+      }
+    }
+
+    // 10b. Delete any remaining locally stored legacy profile images.
     try {
       const uploadDirectory = path.join(
         __dirname,
@@ -336,16 +385,11 @@ const deleteAccount = async (
 
         files
           .filter((fileName) =>
-            fileName.startsWith(
-              userImagePrefix
-            )
+            fileName.startsWith(userImagePrefix)
           )
           .forEach((fileName) => {
             fs.unlinkSync(
-              path.join(
-                uploadDirectory,
-                fileName
-              )
+              path.join(uploadDirectory, fileName)
             );
           });
       }

@@ -15,6 +15,8 @@ const eventRoutes = require("./routes/eventRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const connectionRoutes = require("./routes/connectionRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const mediaRoutes = require("./routes/mediaRoutes");
+const clubRoutes = require("./routes/clubRoutes");
 
 const app = express();
 
@@ -28,6 +30,7 @@ app.use(
 
 app.use(express.json());
 
+// Legacy local uploads (existing filesystem profile images only).
 app.use(
   "/uploads",
   express.static(
@@ -56,9 +59,11 @@ app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/collaborations", collaborationRoutes);
 app.use("/api/events", eventRoutes);
-app.use("/api/notifications",notificationRoutes);
-app.use("/api/connections",connectionRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/connections", connectionRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/media", mediaRoutes);
+app.use("/api/clubs", clubRoutes);
 
 // Error handling - always last
 app.use(notFound);

@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
+const {
+  DEFAULT_NOTIFICATION_PREFERENCES,
+} = require("../utils/mediaHelpers");
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -64,8 +68,9 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    // Legacy string URLs or GridFS refs: { fileId, mimeType }
     profileImage: {
-      type: String,
+      type: mongoose.Schema.Types.Mixed,
       default: "",
     },
 
@@ -82,12 +87,43 @@ const userSchema = new mongoose.Schema(
 
       profileVisibility: {
         type: String,
-        enum: [
-          "everyone",
-          "connections",
-          "only-me",
-        ],
+        enum: ["everyone", "connections", "only-me"],
         default: "everyone",
+      },
+
+      language: {
+        type: String,
+        enum: ["en", "hi"],
+        default: "en",
+      },
+
+      notifications: {
+        eventInvitations: {
+          type: Boolean,
+          default: DEFAULT_NOTIFICATION_PREFERENCES.eventInvitations,
+        },
+        eventReminders: {
+          type: Boolean,
+          default: DEFAULT_NOTIFICATION_PREFERENCES.eventReminders,
+        },
+        eventUpdates: {
+          type: Boolean,
+          default: DEFAULT_NOTIFICATION_PREFERENCES.eventUpdates,
+        },
+        collaborationInvitations: {
+          type: Boolean,
+          default:
+            DEFAULT_NOTIFICATION_PREFERENCES.collaborationInvitations,
+        },
+        collaborationUpdates: {
+          type: Boolean,
+          default:
+            DEFAULT_NOTIFICATION_PREFERENCES.collaborationUpdates,
+        },
+        deadlineReminders: {
+          type: Boolean,
+          default: DEFAULT_NOTIFICATION_PREFERENCES.deadlineReminders,
+        },
       },
     },
 
@@ -110,7 +146,7 @@ const userSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
-    ],  
+    ],
   },
   {
     timestamps: true,
@@ -126,6 +162,7 @@ userSchema.pre("save", async function () {
 
   this.password = await bcrypt.hash(this.password, salt);
 });
+
 userSchema.methods.comparePassword = async function (
   enteredPassword
 ) {
