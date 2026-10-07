@@ -130,6 +130,28 @@ function PostCard({
         )}
       </div>
 
+      {post.media?.type === "image" &&
+        post.media.url && (
+          <div className="mt-4 overflow-hidden rounded-xl border border-slate-100 dark:border-slate-800">
+            <img
+              src={post.media.url}
+              alt="Post media"
+              className="max-h-[32rem] w-full object-contain bg-slate-50 dark:bg-slate-950"
+            />
+          </div>
+        )}
+
+      {post.media?.type === "video" &&
+        post.media.url && (
+          <div className="mt-4 overflow-hidden rounded-xl border border-slate-100 dark:border-slate-800">
+            <video
+              src={post.media.url}
+              controls
+              className="max-h-[32rem] w-full bg-slate-50 dark:bg-slate-950"
+            />
+          </div>
+        )}
+
       <div className="mt-5 flex flex-wrap items-center gap-4 border-t border-slate-100 pt-4 dark:border-slate-800">
         <button
           onClick={handleLike}

@@ -8,6 +8,7 @@ const {
 const {
   DEFAULT_NOTIFICATION_PREFERENCES,
   extractProfileImageFileId,
+  buildMediaUrl,
 } = require("../utils/mediaHelpers");
 const {
   uploadMedia,
@@ -405,10 +406,53 @@ const getUserProfile = async (req, res, next) => {
       )
       .sort({ createdAt: -1 });
 
+    const normalizedPosts = posts.map((post) => {
+      const plain =
+        typeof post.toObject === "function"
+          ? post.toObject()
+          : { ...post };
+
+      if (plain.media?.fileId) {
+        plain.media.url = buildMediaUrl(
+          req,
+          plain.media.fileId
+        );
+      }
+
+      if (plain.author?.profileImage) {
+        plain.author.profileImage =
+          normalizeProfileImageUrl(
+            plain.author.profileImage,
+            req
+          );
+      }
+
+      if (Array.isArray(plain.comments)) {
+        plain.comments = plain.comments.map((comment) => {
+          const next =
+            typeof comment.toObject === "function"
+              ? comment.toObject()
+              : { ...comment };
+
+          if (next.user?.profileImage) {
+            next.user.profileImage =
+              normalizeProfileImageUrl(
+                next.user.profileImage,
+                req
+              );
+          }
+
+          return next;
+        });
+      }
+
+      return plain;
+    });
+
     res.status(200).json({
       success: true,
       user: withNormalizedProfileImage(user, req),
-      posts,
+      posts: normalizedPosts,
       connectionStatus: {
         isConnected,
         requestSent,
