@@ -57,9 +57,13 @@ function Register() {
         <div className="mb-8 text-center">
           <Link
             to="/"
-            className="text-2xl font-bold text-indigo-600"
+            className="inline-flex justify-center"
           >
-            CampusConnect
+            <img
+              src="/branding/campusconnect-logo.svg"
+              alt="CampusConnect"
+              className="h-12 w-auto max-w-full object-contain"
+            />
           </Link>
 
           <h1 className="mt-6 text-2xl font-bold text-slate-900">

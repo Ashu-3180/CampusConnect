@@ -3,8 +3,12 @@ import { Link } from "react-router-dom";
 function Landing() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-6 text-center">
-      <h1 className="text-5xl font-bold text-indigo-600">
-        CampusConnect
+      <h1 className="flex w-full max-w-xl justify-center">
+        <img
+          src="/branding/campusconnect-logo.svg"
+          alt="CampusConnect"
+          className="h-16 w-auto max-w-full object-contain sm:h-20 md:h-24"
+        />
       </h1>
 
       <p className="mt-4 max-w-xl text-lg text-slate-600">

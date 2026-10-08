@@ -149,8 +149,17 @@ function Sidebar() {
     <aside className="hidden min-h-screen w-64 flex-col border-r border-slate-200 bg-white p-4 transition-colors dark:border-slate-800 dark:bg-slate-950 md:flex">
 
       <div className="mb-10 px-2">
-        <h1 className="text-2xl font-bold text-indigo-600">
-          CampusConnect
+        <h1>
+          <img
+            src="/branding/campusconnect-logo.svg"
+            alt="CampusConnect"
+            className="h-10 w-auto max-w-full object-contain dark:hidden"
+          />
+          <img
+            src="/branding/campusconnect-logo-dark.svg"
+            alt="CampusConnect"
+            className="hidden h-10 w-auto max-w-full object-contain dark:block"
+          />
         </h1>
 
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

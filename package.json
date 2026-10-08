@@ -3,5 +3,6 @@
     "mongodb": "^7.5.0",
     "multer": "^2.3.0",
     "react-toastify": "^11.1.0"
-  }
+  },
+  "license": "AGPL-3.0-only"
 }

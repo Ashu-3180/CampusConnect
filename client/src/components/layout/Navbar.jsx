@@ -16,9 +16,16 @@ function Navbar() {
 
         {/* Mobile */}
         <div className="flex items-center gap-2 lg:hidden">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white shadow-sm">
-            C
-          </div>
+          <img
+            src="/branding/campusconnect-mark.svg"
+            alt="CampusConnect"
+            className="h-8 w-auto max-w-[2.5rem] object-contain dark:hidden"
+          />
+          <img
+            src="/branding/campusconnect-mark-dark.svg"
+            alt="CampusConnect"
+            className="hidden h-8 w-auto max-w-[2.5rem] object-contain dark:block"
+          />
 
           <div className="min-w-0">
             <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
@@ -32,10 +39,23 @@ function Navbar() {
         </div>
 
         {/* Desktop */}
-        <h2 className="hidden font-semibold text-slate-800 lg:block dark:text-white">
-          Welcome back,{" "}
-          {user?.name?.split(" ")[0]}
-        </h2>
+        <div className="hidden items-center gap-4 lg:flex">
+          <img
+            src="/branding/campusconnect-wordmark.svg"
+            alt="CampusConnect"
+            className="h-7 w-auto max-w-[11rem] object-contain dark:hidden"
+          />
+          <img
+            src="/branding/campusconnect-wordmark-dark.svg"
+            alt="CampusConnect"
+            className="hidden h-7 w-auto max-w-[11rem] object-contain dark:block"
+          />
+
+          <h2 className="font-semibold text-slate-800 dark:text-white">
+            Welcome back,{" "}
+            {user?.name?.split(" ")[0]}
+          </h2>
+        </div>
 
       </div>
 

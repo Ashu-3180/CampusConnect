@@ -5,3 +5,9 @@ node_modules/
 dist/
 coverage/
 .DS_Store
+
+# Runtime/user-generated files
+server/uploads/
+
+# Temporary development/patch artifacts
+_patch_tmp/
