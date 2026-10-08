@@ -121,7 +121,7 @@ Step '5/8 - Rewriting history'
 Write-Host 'The following paths will be removed from ALL Git history:' -ForegroundColor Yellow
 $PathsToPurge | ForEach-Object { Write-Host "  - $_" }
 
-$filterArgs = @('filter-repo', '--force')
+$filterArgs = @('--force')
 foreach ($path in $PathsToPurge) {
     $filterArgs += @('--path', $path)
 }
