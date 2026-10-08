@@ -1,38 +1,48 @@
 # CampusConnect Git History Cleanup
 # Copyright (C) 2026 Asif Ahamad
 #
-# Source of truth for this release:
-#   CampusConnect(10).zip
+# FINAL source-of-truth snapshot:
+#   CampusConnect(20261008-090555).zip
 #
-# Purpose:
-#   Purge runtime/user-uploaded files and unused/template artifacts from ALL
-#   Git history before publishing the final AGPLv3 release.
+# PURPOSE
+#   Remove runtime/user-uploaded data and known development/template artifacts
+#   from ALL Git history before publishing the final AGPLv3 release.
 #
-# IMPORTANT:
-#   1. Run from the ROOT of the final CampusConnect Git repository.
-#   2. Make a full backup before running.
-#   3. This REWRITES HISTORY; commit hashes will change.
-#   4. Do NOT push automatically. Review everything first.
-#   5. After verification, use --force-with-lease, not plain --force.
+# IMPORTANT
+#   - Run from the ROOT of the existing CampusConnect Git repository.
+#   - Make/keep a full backup before running.
+#   - This REWRITES Git HISTORY; commit hashes WILL change.
+#   - The script NEVER pushes to GitHub.
+#   - Review and test the rewritten repository before pushing.
+#   - Push only with:
+#       git push --force-with-lease origin main
 #
-# This script does NOT decide what source code you own or relicense. It only
-# purges the paths listed below. Third-party software/assets keep their
-# original licenses.
+# PRESERVED
+#   - client/public/branding/*.svg  (CampusConnect branding)
+#   - client/src/assets/hero.png    (not identified as removable)
+#
+# PURGED
+#   - server/uploads/
+#   - _patch_tmp/
+#   - client/README.md
+#   - client/src/assets/vite.svg
+#   - legacy client/public/favicon.svg
+#   - legacy client/public/icons.svg
+#
+# This script does not relicense third-party dependencies or assets.
 
 $ErrorActionPreference = 'Stop'
 
 $RepositoryUrl = 'https://github.com/Ashu-3180/CampusConnect.git'
 $Branch = 'main'
 
-# Final-release cleanup targets identified in the latest supplied snapshot.
 $PathsToPurge = @(
     'server/uploads/',
     '_patch_tmp/',
     'client/README.md',
     'client/src/assets/vite.svg',
     'client/public/favicon.svg',
-    'client/public/icons.svg',
-    'client/src/assets/hero.png'
+    'client/public/icons.svg'
 )
 
 function Step([string]$Message) {
@@ -46,7 +56,7 @@ function Require-Command([string]$Name) {
 }
 
 Write-Host '=============================================' -ForegroundColor Cyan
-Write-Host ' CampusConnect - Final AGPLv3 History Clean' -ForegroundColor Cyan
+Write-Host ' CampusConnect - FINAL AGPLv3 History Clean' -ForegroundColor Cyan
 Write-Host ' Copyright (C) 2026 Asif Ahamad' -ForegroundColor Cyan
 Write-Host '=============================================' -ForegroundColor Cyan
 
@@ -74,7 +84,7 @@ Step '2/8 - Working tree safety check'
 $status = git status --porcelain
 if ($status) {
     Write-Host $status
-    throw 'Working tree is not clean. Commit the final CampusConnect state first, then rerun this script.'
+    throw 'Working tree is not clean. Commit the final CampusConnect release state first, then rerun this script.'
 }
 
 Step '3/8 - Checking git-filter-repo'
@@ -108,21 +118,22 @@ Write-Host "Recovery branch: $backupRef" -ForegroundColor Green
 
 Step '5/8 - Rewriting history'
 
-Write-Host 'Paths to purge from all Git history:' -ForegroundColor Yellow
+Write-Host 'The following paths will be removed from ALL Git history:' -ForegroundColor Yellow
 $PathsToPurge | ForEach-Object { Write-Host "  - $_" }
 
-$args = @('filter-repo', '--force')
+$filterArgs = @('filter-repo', '--force')
 foreach ($path in $PathsToPurge) {
-    $args += @('--path', $path)
+    $filterArgs += @('--path', $path)
 }
-$args += '--invert-paths'
+$filterArgs += '--invert-paths'
 
-& git-filter-repo @args
+& git-filter-repo @filterArgs
+
 if ($LASTEXITCODE -ne 0) {
     throw 'git-filter-repo failed. Stop and inspect the repository.'
 }
 
-# git-filter-repo commonly removes origin as a safety measure.
+# git-filter-repo may remove origin as a safety precaution.
 $originUrl = git remote get-url origin 2>$null
 if ($LASTEXITCODE -eq 0) {
     if ($originUrl -ne $RepositoryUrl) {
@@ -136,7 +147,7 @@ else {
 Step '6/8 - Current-tree verification'
 
 $badCurrent = git ls-files |
-    Select-String -Pattern '(^|/)(_patch_tmp/|server/uploads/|client/README\.md$|client/src/assets/vite\.svg$|client/public/(favicon|icons)\.svg$|client/src/assets/hero\.png$|.*\.env$)'
+    Select-String -Pattern '(^|/)(_patch_tmp/|server/uploads/|client/README\.md$|client/src/assets/vite\.svg$|client/public/(favicon|icons)\.svg$|.*\.env$)'
 
 if ($badCurrent) {
     Write-Host $badCurrent
@@ -148,14 +159,14 @@ Write-Host 'Current-tree cleanup: PASS' -ForegroundColor Green
 Step '7/8 - Historical verification'
 
 $badHistory = git log --all --name-only --pretty=format: |
-    Select-String -Pattern '(^|/)(_patch_tmp/|server/uploads/|client/README\.md$|client/src/assets/vite\.svg$|client/public/(favicon|icons)\.svg$|client/src/assets/hero\.png$)'
+    Select-String -Pattern '(^|/)(_patch_tmp/|server/uploads/|client/README\.md$|client/src/assets/vite\.svg$|client/public/(favicon|icons)\.svg$)'
 
 if ($badHistory) {
     Write-Host $badHistory
     throw 'One or more excluded paths remain in Git history. Do not push.'
 }
 
-# Detect historical .env files, but allow .env.example.
+# Detect real .env files in history, allowing only .env.example.
 $envHistory = git log --all --name-only --pretty=format: |
     Select-String -Pattern '(^|/)\.env($|\.)' |
     Where-Object { $_.Line -notmatch '(^|/)\.env\.example$' } |
@@ -183,6 +194,7 @@ git remote -v
 Write-Host "`nRecovery branch:"
 Write-Host $backupRef -ForegroundColor Yellow
 
-Write-Host "`nNO REMOTE PUSH WAS PERFORMED." -ForegroundColor Green
-Write-Host "After reviewing and testing the application, push with:"
-Write-Host "  git push --force-with-lease origin main" -ForegroundColor White
+Write-Host ''
+Write-Host 'NO REMOTE PUSH WAS PERFORMED.' -ForegroundColor Green
+Write-Host 'After application testing and final review, push with:'
+Write-Host '  git push --force-with-lease origin main' -ForegroundColor White
