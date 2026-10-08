@@ -118,9 +118,17 @@ function Discover() {
                 {/* Student header */}
                 <div className="flex items-center gap-3 sm:gap-4">
 
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-lg font-bold text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300 sm:h-14 sm:w-14 sm:text-xl">
-                    {initial}
-                  </div>
+                  {student.profileImage ? (
+                    <img
+                      src={student.profileImage}
+                      alt={student.name}
+                      className="h-12 w-12 shrink-0 rounded-full object-cover sm:h-14 sm:w-14"
+                    />
+                  ) : (
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-lg font-bold text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300 sm:h-14 sm:w-14 sm:text-xl">
+                      {initial}
+                    </div>
+                  )}
 
                   <div className="min-w-0">
 

@@ -66,9 +66,17 @@ function Navbar() {
 
         <div className="flex items-center gap-2">
 
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 font-semibold text-indigo-600 ring-2 ring-white dark:bg-indigo-500/20 dark:text-indigo-300 dark:ring-slate-950">
-            {initial}
-          </div>
+          {user?.profileImage ? (
+            <img
+              src={user.profileImage}
+              alt={user.name}
+              className="h-9 w-9 rounded-full object-cover ring-2 ring-white dark:ring-slate-950"
+            />
+          ) : (
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 font-semibold text-indigo-600 ring-2 ring-white dark:bg-indigo-500/20 dark:text-indigo-300 dark:ring-slate-950">
+              {initial}
+            </div>
+          )}
 
           <span className="hidden text-sm font-medium text-slate-700 sm:block dark:text-slate-200">
             {user?.name}
