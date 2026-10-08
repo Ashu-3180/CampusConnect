@@ -1,5 +1,55 @@
 const Message = require("../models/Message");
 const User = require("../models/User");
+const {
+  normalizeProfileImageUrl,
+} = require("../utils/profileImageUrl");
+
+const withNormalizedProfileImage = (user, req) => {
+  if (!user) {
+    return user;
+  }
+
+  const plain =
+    typeof user.toObject === "function"
+      ? user.toObject()
+      : { ...user };
+
+  if (plain.profileImage) {
+    plain.profileImage = normalizeProfileImageUrl(
+      plain.profileImage,
+      req
+    );
+  }
+
+  return plain;
+};
+
+const withNormalizedMessage = (message, req) => {
+  if (!message) {
+    return message;
+  }
+
+  const plain =
+    typeof message.toObject === "function"
+      ? message.toObject()
+      : { ...message };
+
+  if (plain.sender) {
+    plain.sender = withNormalizedProfileImage(
+      plain.sender,
+      req
+    );
+  }
+
+  if (plain.receiver) {
+    plain.receiver = withNormalizedProfileImage(
+      plain.receiver,
+      req
+    );
+  }
+
+  return plain;
+};
 
 // Send a message
 const sendMessage = async (req, res, next) => {
@@ -63,6 +113,11 @@ const sendMessage = async (req, res, next) => {
       "name profileImage"
     );
 
+    const normalizedMessage = withNormalizedMessage(
+      message,
+      req
+    );
+
     // Get Socket.IO and connected users
     const io = req.app.get("io");
 
@@ -79,13 +134,13 @@ const sendMessage = async (req, res, next) => {
     if (receiverSocketId) {
       io.to(receiverSocketId).emit(
         "newMessage",
-        message
+        normalizedMessage
       );
     }
 
     res.status(201).json({
       success: true,
-      message,
+      message: normalizedMessage,
     });
   } catch (error) {
     next(error);
@@ -179,10 +234,17 @@ const getConversation = async (
       }
     }
 
+    const normalizedMessages = messages.map(
+      (message) => withNormalizedMessage(message, req)
+    );
+
     res.status(200).json({
       success: true,
-      otherUser,
-      messages,
+      otherUser: withNormalizedProfileImage(
+        otherUser,
+        req
+      ),
+      messages: normalizedMessages,
     });
   } catch (error) {
     next(error);
@@ -249,7 +311,17 @@ const getConversations = async (
 
     const conversations = Array.from(
       conversationsMap.values()
-    );
+    ).map((conversation) => ({
+      user: withNormalizedProfileImage(
+        conversation.user,
+        req
+      ),
+      lastMessage: withNormalizedMessage(
+        conversation.lastMessage,
+        req
+      ),
+      unreadCount: conversation.unreadCount,
+    }));
 
     res.status(200).json({
       success: true,
