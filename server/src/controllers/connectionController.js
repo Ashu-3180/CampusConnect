@@ -2,6 +2,29 @@ const User = require("../models/User");
 const createNotification = require(
   "../utils/createNotification"
 );
+const {
+  normalizeProfileImageUrl,
+} = require("../utils/profileImageUrl");
+
+const withNormalizedProfileImage = (user, req) => {
+  if (!user) {
+    return user;
+  }
+
+  const plain =
+    typeof user.toObject === "function"
+      ? user.toObject()
+      : { ...user };
+
+  if (plain.profileImage) {
+    plain.profileImage = normalizeProfileImageUrl(
+      plain.profileImage,
+      req
+    );
+  }
+
+  return plain;
+};
 
 const sendConnectionRequest = async (
   req,
@@ -272,10 +295,16 @@ const getMyConnections = async (
       "name university course graduationYear skills profileImage"
     );
 
+    const connections = (
+      user.connections || []
+    ).map((connection) =>
+      withNormalizedProfileImage(connection, req)
+    );
+
     res.status(200).json({
       success: true,
-      count: user.connections.length,
-      connections: user.connections,
+      count: connections.length,
+      connections,
     });
   } catch (error) {
     next(error);
@@ -295,12 +324,16 @@ const getReceivedRequests = async (
       "name university course skills profileImage"
     );
 
+    const requests = (
+      user.receivedConnectionRequests || []
+    ).map((requestUser) =>
+      withNormalizedProfileImage(requestUser, req)
+    );
+
     res.status(200).json({
       success: true,
-      count:
-        user.receivedConnectionRequests.length,
-      requests:
-        user.receivedConnectionRequests,
+      count: requests.length,
+      requests,
     });
   } catch (error) {
     next(error);

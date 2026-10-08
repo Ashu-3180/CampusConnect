@@ -561,7 +561,7 @@ function Settings() {
             icon="users"
             title="Clubs & Communities"
             description="Manage your campus groups and memberships"
-            onClick={() => navigate("/app/network")}
+            onClick={() => navigate("/app/clubs")}
           />
 
           <div className="mx-3 border-t border-slate-100 dark:border-slate-800" />
