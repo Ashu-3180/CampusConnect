@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
+import DynamicBackground from "./DynamicBackground";
 import { useAuth } from "../../context/AuthContext";
 
 const mobilePrimaryNavigation = [
@@ -89,19 +90,21 @@ function AppLayout({ children }) {
     }`;
 
   return (
-    <div className="min-h-screen bg-slate-50 transition-colors dark:bg-slate-950">
+    <div className="relative min-h-screen bg-transparent transition-colors">
+
+      <DynamicBackground />
 
       {/* Desktop Sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:block">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-20 lg:block">
         <Sidebar />
       </div>
 
       {/* Main Application Area */}
-      <div className="min-h-screen bg-slate-50 lg:ml-64 dark:bg-slate-950">
+      <div className="relative z-10 min-h-screen bg-transparent lg:ml-64">
 
         <Navbar />
 
-        <main className="min-w-0 bg-slate-50 p-4 pb-28 sm:p-6 sm:pb-28 lg:p-8 lg:pb-8 dark:bg-slate-950">
+        <main className="min-w-0 bg-transparent p-4 pb-28 sm:p-6 sm:pb-28 lg:p-8 lg:pb-8">
           {children}
         </main>
       </div>
