@@ -50,31 +50,53 @@ const getMedia = async (req, res, next) => {
     }
 
     // Video Range support for seeking.
+    // Supports: bytes=0-999 | bytes=1000- | bytes=-500
     const match = /^bytes=(\d*)-(\d*)$/.exec(rangeHeader);
-
-    if (!match) {
+    const sendUnsatisfiable = () => {
       res.status(416);
-      throw new Error("Invalid Range header");
-    }
-
-    const start = match[1] ? Number(match[1]) : 0;
-    let end = match[2] ? Number(match[2]) : fileSize - 1;
-
-    if (
-      Number.isNaN(start) ||
-      Number.isNaN(end) ||
-      start < 0 ||
-      start >= fileSize
-    ) {
-      res.status(416);
-      res.setHeader(
-        "Content-Range",
-        `bytes */${fileSize}`
-      );
+      res.setHeader("Content-Range", `bytes */${fileSize}`);
       throw new Error("Requested range is not satisfiable");
+    };
+
+    if (!match || (!match[1] && !match[2])) {
+      sendUnsatisfiable();
     }
 
-    end = Math.min(end, fileSize - 1);
+    let start;
+    let end;
+
+    if (!match[1]) {
+      // Suffix range: bytes=-N → last N bytes
+      const suffixLength = Number(match[2]);
+
+      if (
+        Number.isNaN(suffixLength) ||
+        suffixLength <= 0 ||
+        fileSize === 0
+      ) {
+        sendUnsatisfiable();
+      }
+
+      start = Math.max(fileSize - suffixLength, 0);
+      end = fileSize - 1;
+    } else {
+      start = Number(match[1]);
+      end = match[2] ? Number(match[2]) : fileSize - 1;
+
+      if (
+        Number.isNaN(start) ||
+        Number.isNaN(end) ||
+        start < 0 ||
+        start >= fileSize ||
+        end < start
+      ) {
+        sendUnsatisfiable();
+      }
+
+      // Clamp open or oversized end to the last valid byte.
+      end = Math.min(end, fileSize - 1);
+    }
+
     const chunkSize = end - start + 1;
 
     res.status(206);

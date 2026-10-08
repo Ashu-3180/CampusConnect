@@ -16,6 +16,7 @@ const navigation = [
     path: "/app/collaborations",
   },
   { name: "Events", path: "/app/events" },
+  { name: "Clubs", path: "/app/clubs" },
   {
     name: "Discover",
     path: "/app/discover",

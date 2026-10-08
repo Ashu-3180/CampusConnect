@@ -11,6 +11,7 @@ import Collaborations from "./pages/Collaborations";
 import CreateCollaboration from "./pages/CreateCollaboration";
 import CollaborationDetails from "./pages/CollaborationDetails";
 import Events from "./pages/Events";
+import Clubs from "./pages/Clubs";
 import Discover from "./pages/Discover";
 import SearchPage from "./pages/SearchPage";
 import Network from "./pages/Network";
@@ -82,6 +83,17 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <Events />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/app/clubs"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Clubs />
               </AppLayout>
             </ProtectedRoute>
           }

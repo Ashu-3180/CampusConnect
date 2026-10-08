@@ -22,6 +22,11 @@ const mobilePrimaryNavigation = [
     icon: "◫",
   },
   {
+    name: "Clubs",
+    path: "/app/clubs",
+    icon: "⬡",
+  },
+  {
     name: "Network",
     path: "/app/network",
     icon: "♧",

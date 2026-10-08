@@ -5,6 +5,12 @@ import { useAuth } from "../context/AuthContext";
 import userService from "../services/userService";
 import PasswordSecurityPanel from "../components/settings/PasswordSecurityPanel";
 import DeleteAccountPanel from "../components/settings/DeleteAccountPanel";
+import PrivacySafetyPanel from "../components/settings/PrivacySafetyPanel";
+import EmailNotificationsPanel from "../components/settings/EmailNotificationsPanel";
+import EventsCollaborationsPanel from "../components/settings/EventsCollaborationsPanel";
+import LanguagePanel from "../components/settings/LanguagePanel";
+import HelpCenterPanel from "../components/settings/HelpCenterPanel";
+import AboutPanel from "../components/settings/AboutPanel";
 
 import {
   SettingsIcon as Icon,
@@ -13,6 +19,15 @@ import {
   SettingRow,
   SettingsSection as Section,
 } from "../components/settings/SettingsUI";
+
+const DEFAULT_NOTIFICATIONS = {
+  eventInvitations: true,
+  eventReminders: true,
+  eventUpdates: true,
+  collaborationInvitations: true,
+  collaborationUpdates: true,
+  deadlineReminders: true,
+};
 
 function Settings() {
   const navigate = useNavigate();
@@ -23,6 +38,10 @@ function Settings() {
     useState(true);
   const [profileVisibility, setProfileVisibility] =
     useState("everyone");
+  const [language, setLanguage] = useState("en");
+  const [notifications, setNotifications] = useState(
+    DEFAULT_NOTIFICATIONS
+  );
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -36,6 +55,15 @@ function Settings() {
     useState(false);
   const [showDeleteAccount, setShowDeleteAccount] =
     useState(false);
+  const [showPrivacySafety, setShowPrivacySafety] =
+    useState(false);
+  const [showEmailNotifications, setShowEmailNotifications] =
+    useState(false);
+  const [showEventsCollaborations, setShowEventsCollaborations] =
+    useState(false);
+  const [showLanguage, setShowLanguage] = useState(false);
+  const [showHelpCenter, setShowHelpCenter] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -59,6 +87,11 @@ function Settings() {
         setProfileVisibility(
           preferences.profileVisibility || "everyone"
         );
+        setLanguage(preferences.language || "en");
+        setNotifications({
+          ...DEFAULT_NOTIFICATIONS,
+          ...(preferences.notifications || {}),
+        });
 
         // Keep AuthContext in sync so dark mode and
         // other prefs survive navigation after refresh.
@@ -123,7 +156,12 @@ function Settings() {
     return () => window.clearTimeout(timer);
   }, [feedback]);
 
-  const persistPreference = async (key, nextValue, previousValue) => {
+  const persistPreference = async (
+    key,
+    nextValue,
+    previousValue,
+    options = {}
+  ) => {
     if (savingPreference) {
       return;
     }
@@ -134,23 +172,38 @@ function Settings() {
     setFeedback("");
 
     try {
-      const data = await userService.updateMyPreferences({
-        [key]: nextValue,
-      });
+      const payload = options.notificationKey
+        ? { notifications: { [key]: nextValue } }
+        : { [key]: nextValue };
+
+      const data =
+        await userService.updateMyPreferences(payload);
 
       const preferences = data.preferences || {};
-      const finalValue = preferences[key] ?? nextValue;
 
-      if (key === "darkMode") {
-        setDarkMode(finalValue);
-      }
+      if (options.notificationKey) {
+        setNotifications({
+          ...DEFAULT_NOTIFICATIONS,
+          ...(preferences.notifications || {}),
+        });
+      } else {
+        const finalValue = preferences[key] ?? nextValue;
 
-      if (key === "emailNotifications") {
-        setEmailNotifications(finalValue);
-      }
+        if (key === "darkMode") {
+          setDarkMode(finalValue);
+        }
 
-      if (key === "profileVisibility") {
-        setProfileVisibility(finalValue);
+        if (key === "emailNotifications") {
+          setEmailNotifications(finalValue);
+        }
+
+        if (key === "profileVisibility") {
+          setProfileVisibility(finalValue);
+        }
+
+        if (key === "language") {
+          setLanguage(finalValue);
+        }
       }
 
       if (user) {
@@ -158,7 +211,18 @@ function Settings() {
           ...user,
           preferences: {
             ...user.preferences,
-            [key]: finalValue,
+            ...preferences,
+            ...(options.notificationKey
+              ? {
+                  notifications: {
+                    ...DEFAULT_NOTIFICATIONS,
+                    ...(preferences.notifications || {}),
+                  },
+                }
+              : {
+                  [key]:
+                    preferences[key] ?? nextValue,
+                }),
           },
         });
       }
@@ -166,6 +230,13 @@ function Settings() {
       setSavedPreference(key);
       setFeedback("Preference updated successfully.");
     } catch (requestError) {
+      if (options.notificationKey) {
+        setNotifications((current) => ({
+          ...current,
+          [key]: previousValue,
+        }));
+      }
+
       if (key === "darkMode") {
         setDarkMode(previousValue);
       }
@@ -176,6 +247,10 @@ function Settings() {
 
       if (key === "profileVisibility") {
         setProfileVisibility(previousValue);
+      }
+
+      if (key === "language") {
+        setLanguage(previousValue);
       }
 
       setError(
@@ -236,6 +311,40 @@ function Settings() {
       nextValue,
       previousValue
     );
+  };
+
+  const handleLanguageChange = (nextLanguage) => {
+    if (savingPreference || nextLanguage === language) {
+      return;
+    }
+
+    const previousValue = language;
+
+    setLanguage(nextLanguage);
+
+    persistPreference(
+      "language",
+      nextLanguage,
+      previousValue
+    );
+  };
+
+  const handleNotificationToggle = (key) => {
+    if (savingPreference) {
+      return;
+    }
+
+    const previousValue = Boolean(notifications[key]);
+    const nextValue = !previousValue;
+
+    setNotifications((current) => ({
+      ...current,
+      [key]: nextValue,
+    }));
+
+    persistPreference(key, nextValue, previousValue, {
+      notificationKey: true,
+    });
   };
 
   if (loading) {
@@ -393,12 +502,7 @@ function Settings() {
             icon="shield"
             title="Privacy & Safety"
             description="Review your privacy and account safety options"
-            onClick={() => {
-              setError("");
-              setFeedback(
-                "Use Profile Visibility to control who can see your profile. Open Password & Security for account safety."
-              );
-            }}
+            onClick={() => setShowPrivacySafety(true)}
           />
         </Section>
 
@@ -433,25 +537,9 @@ function Settings() {
             icon="bell"
             title="Email Notifications"
             description="Receive updates and important account notifications"
-          >
-            <div className="flex shrink-0 items-center gap-2">
-              <SavingIndicator
-                active={
-                  savingPreference === "emailNotifications"
-                }
-                saved={
-                  savedPreference === "emailNotifications"
-                }
-              />
-
-              <Toggle
-                checked={emailNotifications}
-                onChange={handleEmailNotificationsChange}
-                disabled={Boolean(savingPreference)}
-                label="Toggle email notifications"
-              />
-            </div>
-          </SettingRow>
+            value={emailNotifications ? "On" : "Off"}
+            onClick={() => setShowEmailNotifications(true)}
+          />
 
           <div className="mx-3 border-t border-slate-100 dark:border-slate-800" />
 
@@ -459,13 +547,8 @@ function Settings() {
             icon="globe"
             title="Language"
             description="Choose the language used by CampusConnect"
-            value="English"
-            onClick={() => {
-              setError("");
-              setFeedback(
-                "CampusConnect currently supports English only."
-              );
-            }}
+            value={language === "hi" ? "हिन्दी" : "English"}
+            onClick={() => setShowLanguage(true)}
           />
         </Section>
 
@@ -487,7 +570,7 @@ function Settings() {
             icon="info"
             title="Events & Collaborations"
             description="Manage your campus activities and preferences"
-            onClick={() => navigate("/app/events")}
+            onClick={() => setShowEventsCollaborations(true)}
           />
         </Section>
 
@@ -515,12 +598,7 @@ function Settings() {
             icon="info"
             title="Help Center"
             description="Find answers to common questions"
-            onClick={() => {
-              setError("");
-              setFeedback(
-                "Use the main navigation for Discover, Network, Events, and Collaborations. Password help is under Password & Security."
-              );
-            }}
+            onClick={() => setShowHelpCenter(true)}
           />
 
           <div className="mx-3 border-t border-slate-100 dark:border-slate-800" />
@@ -551,12 +629,7 @@ function Settings() {
             title="About CampusConnect"
             description="App information and version"
             value="v1.0"
-            onClick={() => {
-              setError("");
-              setFeedback(
-                "CampusConnect v1.0 — connect with students, events, and collaborations on campus."
-              );
-            }}
+            onClick={() => setShowAbout(true)}
           />
         </Section>
       </div>
@@ -601,6 +674,52 @@ function Settings() {
         open={showDeleteAccount}
         onClose={() => setShowDeleteAccount(false)}
         onDeleted={logout}
+      />
+
+      <PrivacySafetyPanel
+        open={showPrivacySafety}
+        onClose={() => setShowPrivacySafety(false)}
+        profileVisibility={profileVisibility}
+        onChangeVisibility={handleProfileVisibilityChange}
+        saving={savingPreference === "profileVisibility"}
+        onOpenPassword={() => setShowPasswordSecurity(true)}
+        onOpenDelete={() => setShowDeleteAccount(true)}
+      />
+
+      <EmailNotificationsPanel
+        open={showEmailNotifications}
+        onClose={() => setShowEmailNotifications(false)}
+        emailNotifications={emailNotifications}
+        onToggleEmail={handleEmailNotificationsChange}
+        saving={savingPreference === "emailNotifications"}
+        saved={savedPreference === "emailNotifications"}
+      />
+
+      <EventsCollaborationsPanel
+        open={showEventsCollaborations}
+        onClose={() => setShowEventsCollaborations(false)}
+        notifications={notifications}
+        onToggle={handleNotificationToggle}
+        savingKey={savingPreference}
+        savedKey={savedPreference}
+      />
+
+      <LanguagePanel
+        open={showLanguage}
+        onClose={() => setShowLanguage(false)}
+        language={language}
+        onChangeLanguage={handleLanguageChange}
+        saving={savingPreference === "language"}
+      />
+
+      <HelpCenterPanel
+        open={showHelpCenter}
+        onClose={() => setShowHelpCenter(false)}
+      />
+
+      <AboutPanel
+        open={showAbout}
+        onClose={() => setShowAbout(false)}
       />
     </div>
   );

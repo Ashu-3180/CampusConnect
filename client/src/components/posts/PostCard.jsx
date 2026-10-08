@@ -1,8 +1,11 @@
 import { useState } from "react";
 
 import { useAuth } from "../../context/AuthContext";
+import postService from "../../services/postService";
 
 import { Link } from "react-router-dom";
+
+const MAX_COMMENT_LENGTH = 1000;
 
 function PostCard({
   post,
@@ -21,6 +24,16 @@ function PostCard({
   const [loading, setLoading] =
     useState(false);
 
+  const [comments, setComments] = useState(
+    () => post.comments || []
+  );
+
+  const [commentText, setCommentText] =
+    useState("");
+
+  const [commentLoading, setCommentLoading] =
+    useState(false);
+
   const isOwner =
     post.author?._id === user?._id ||
     post.author?._id === user?.id;
@@ -33,6 +46,19 @@ function PostCard({
       like === currentUserId ||
       like?._id === currentUserId
   );
+
+  const isCommentOwner = (comment) => {
+    const commentUserId =
+      comment.user?._id ||
+      comment.user?.id ||
+      comment.user;
+
+    return (
+      commentUserId === currentUserId ||
+      String(commentUserId) ===
+        String(currentUserId)
+    );
+  };
 
   const handleLike = async () => {
     try {
@@ -71,6 +97,51 @@ function PostCard({
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAddComment = async (event) => {
+    event.preventDefault();
+
+    const text = commentText.trim();
+
+    if (
+      !text ||
+      text.length > MAX_COMMENT_LENGTH
+    ) {
+      return;
+    }
+
+    setCommentLoading(true);
+
+    try {
+      const result = await postService.addComment(
+        post._id,
+        text
+      );
+
+      setComments(result.comments || []);
+      setCommentText("");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setCommentLoading(false);
+    }
+  };
+
+  const handleDeleteComment = async (
+    commentId
+  ) => {
+    try {
+      const result =
+        await postService.deleteComment(
+          post._id,
+          commentId
+        );
+
+      setComments(result.comments || []);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -166,6 +237,13 @@ function PostCard({
           ({post.likes?.length || 0})
         </button>
 
+        <span className="text-sm text-slate-500 dark:text-slate-400">
+          {comments.length}{" "}
+          {comments.length === 1
+            ? "comment"
+            : "comments"}
+        </span>
+
         {isOwner && !isEditing && (
           <>
             <button
@@ -205,6 +283,110 @@ function PostCard({
             </button>
           </>
         )}
+      </div>
+
+      <div className="mt-4 space-y-4 border-t border-slate-100 pt-4 dark:border-slate-800">
+        {comments.length > 0 && (
+          <ul className="space-y-3">
+            {comments.map((comment) => {
+              const commentInitial =
+                comment.user?.name
+                  ? comment.user.name
+                      .charAt(0)
+                      .toUpperCase()
+                  : "U";
+
+              return (
+                <li
+                  key={comment._id}
+                  className="rounded-xl bg-slate-50 p-3 dark:bg-slate-950/60"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 gap-2.5">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300">
+                        {commentInitial}
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-slate-800 dark:text-white">
+                          {comment.user?.name ||
+                            "Unknown User"}
+                        </p>
+
+                        <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                          {comment.text}
+                        </p>
+
+                        {comment.createdAt && (
+                          <p className="mt-1 text-xs text-slate-500 dark:text-slate-500">
+                            {new Date(
+                              comment.createdAt
+                            ).toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {isCommentOwner(comment) && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleDeleteComment(
+                            comment._id
+                          )
+                        }
+                        className="shrink-0 text-xs text-slate-500 transition-colors hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+
+        <form
+          onSubmit={handleAddComment}
+          className="space-y-2"
+        >
+          <textarea
+            value={commentText}
+            onChange={(event) =>
+              setCommentText(
+                event.target.value.slice(
+                  0,
+                  MAX_COMMENT_LENGTH
+                )
+              )
+            }
+            maxLength={MAX_COMMENT_LENGTH}
+            rows="2"
+            placeholder="Write a comment..."
+            className="w-full resize-none rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 outline-none transition-colors focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+          />
+
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-slate-500 dark:text-slate-500">
+              {commentText.length}/
+              {MAX_COMMENT_LENGTH}
+            </p>
+
+            <button
+              type="submit"
+              disabled={
+                commentLoading ||
+                !commentText.trim()
+              }
+              className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {commentLoading
+                ? "Posting..."
+                : "Comment"}
+            </button>
+          </div>
+        </form>
       </div>
     </article>
   );
